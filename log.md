@@ -53,3 +53,26 @@
 - [`src/components/shareContent/merchantDraw/dashboard/UserVoucherTab.jsx`](file:///Users/joewintan/Documents/share-ai-app-staging/src/components/shareContent/merchantDraw/dashboard/UserVoucherTab.jsx)
 - [`src/components/shareContent/merchantDraw/dashboard/BottomNavbar.jsx`](file:///Users/joewintan/Documents/share-ai-app-staging/src/components/shareContent/merchantDraw/dashboard/BottomNavbar.jsx)
 - [`src/components/shareContent/merchantDraw/dashboard/MerchantDetailModal.jsx`](file:///Users/joewintan/Documents/share-ai-app-staging/src/components/shareContent/merchantDraw/dashboard/MerchantDetailModal.jsx) *(NEW)*
+
+---
+
+### 🎯 LuckyDraw Flow Page Redesign & Mission Flow (`/shareSection/luckyDraw`)
+- **Flow Bottom Navbar (`FlowBottomNavbar.jsx`)**: Implemented floating glassmorphic navigation bar with `[ 🏠 Home ]` and `[ 📄 Details ]` tab buttons.
+- **Mission Flow Home Tab (`MerchantDrawFlowPage.jsx`)**:
+  - **1. Monthly Mega Draw**: Added mission cards container (`Submit spending proof`, `Spin Merchant Wheel`, `Draw Voucher Capsule`, `Check Prize Wallet`) with `Click here to view full Campaign Details & Prize List >` link pill.
+  - **2. Instant Win Rewards**: Embedded games section (Lucky Wheel & Capsule Machine) and Flash Voucher Highlights cards (`RM5 Off Rebate`, `15% Storewide Promo`).
+  - **3D Animated Gift Icon**: Integrated floating SVG `<GiftIcon>` animation with bobbing lid movement, glowing ribbon shimmer, and interactive click handler.
+- **UX-Enhanced Details Tab**:
+  - Added campaign hero banner image (`public/campaign-hero.png`).
+  - Implemented Touch 'n Go style structured Prize List table (`No.` | `Prize` | `Type`).
+  - Added expandable Accordion cards for **Terms & Conditions** and **FAQ**.
+  - Added primary blue `Join Now` action button linking back to the Home tab.
+
+---
+
+### 📁 Newly Modified Files
+- [`src/components/shareContent/merchantDraw/components/FlowBottomNavbar.jsx`](file:///Users/joewintan/Documents/share-ai-app-staging/src/components/shareContent/merchantDraw/components/FlowBottomNavbar.jsx) *(NEW)*
+- [`src/components/shareContent/merchantDraw/page/MerchantDrawFlowPage.jsx`](file:///Users/joewintan/Documents/share-ai-app-staging/src/components/shareContent/merchantDraw/page/MerchantDrawFlowPage.jsx)
+- [`public/campaign-hero.png`](file:///Users/joewintan/Documents/share-ai-app-staging/public/campaign-hero.png) *(NEW)*
+- [`log.md`](file:///Users/joewintan/Documents/share-ai-app-staging/log.md)
+
