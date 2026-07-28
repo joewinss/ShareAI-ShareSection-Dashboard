@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShareAi — Visual Generation System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Assistant:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ==============================
+   VARIABLES
+   ============================== */
+    :root {
+      --primary: #16a34a;
+      --primary-hover: #15803d;
+      --primary-light: #f0fdf4;
+      --primary-lighter: #dcfce7;
+      --blue: #2563eb;
+      --blue-hover: #1d4ed8;
+      --gradient-primary: linear-gradient(90deg, #16a34a 0%, #2563eb 100%);
+      --gradient-primary-hover: linear-gradient(90deg, #15803d 0%, #1d4ed8 100%);
+      --bg: #F6F6F7;
+      --card: #FFFFFF;
+      --text: #4B5563;
+      --text-muted: #A6A8A8;
+      --border: #E5E7EB;
+      --dark: #0f172a;
+
+      --grad-a: #15803d;
+      --grad-b: #06b6d4;
+      --grad-c: #1e40af;
+
+      --ff-head: 'Syne', sans-serif;
+      --ff-body: 'Assistant', Arial, sans-serif;
+      --ff-code: 'Fira Code', monospace;
+
+      --r-sm: 4px;
+      --r-md: 8px;
+      --r-lg: 12px;
+      --r-xl: 20px;
+      --r-full: 9999px;
+      --sh-sm: 0 1px 2px rgba(0, 0, 0, .05);
+      --sh-md: 0 4px 12px rgba(0, 0, 0, .08);
+      --sh-lg: 0 10px 24px rgba(0, 0, 0, .1);
+      --sh-brand: 0 8px 32px rgba(37, 99, 235, .18);
+    }
+
+    /* ==============================
+   RESET
+   ============================== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--ff-body);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      line-height: 1.5;
+      cursor: none;
+      overflow-x: hidden;
+    }
+
+    code {
+      font-family: var(--ff-code);
+      font-size: .85em;
+      color: var(--primary);
+    }
+
+    a, button, [role=button] { cursor: none; }
+
+    /* ==============================
+   CUSTOM CURSOR
+   ============================== */
+    #cur-dot {
+      position: fixed;
+      width: 11px; height: 11px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--grad-a), var(--grad-b), var(--grad-c));
+      pointer-events: none;
+      z-index: 99999;
+      transform: translate(-50%, -50%);
+      transition: width .18s, height .18s, opacity .18s;
+      will-change: left, top;
+    }
+
+    #cur-ring {
+      position: fixed;
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(37, 99, 235, .34);
+      pointer-events: none;
+      z-index: 99998;
+      transform: translate(-50%, -50%);
+      transition: width .2s, height .2s, border-color .2s;
+      will-change: left, top;
+    }
+
+    .cur-big #cur-dot { width: 18px; height: 18px; }
+    .cur-big #cur-ring { width: 46px; height: 46px; border-color: rgba(22, 163, 74, .48); }
+
+    /* ==============================
+   NAV
+   ============================== */
+    .nav {
+      position: sticky;
+      top: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 100;
+    }
+
+    .nav-left { display: flex; align-items: center; gap: 10px; }
+
+    .nav-icon {
+      width: 28px; height: 28px;
+      background: var(--primary);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-name { font-family: var(--ff-head); font-size: 15px; font-weight: 700; color: var(--dark); }
+
+    .nav-pill {
+      font-family: var(--ff-code);
+      font-size: 10px;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 9px;
+      border-radius: var(--r-full);
+    }
+
+    /* ==============================
+   LAYOUT
+   ============================== */
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .sec { padding: 68px 0; }
+    .sec + .sec { border-top: 1px solid var(--border); }
+
+    .sec-label {
+      font-family: var(--ff-code);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 8px;
+    }
+
+    .sec-title {
+      font-family: var(--ff-head);
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 10px;
+      line-height: 1.15;
+    }
+
+    .sec-desc {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 560px;
+      line-height: 1.7;
+    }
+
+    .sec-hd { margin-bottom: 40px; }
+
+    /* ==============================
+   HERO
+   ============================== */
+    .hero {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 56px 0 44px;
+    }
+
+    .hero-grid { display: grid; grid-template-columns: 1fr auto; gap: 40px; align-items: center; }
+
+    .hero-eyebrow {
+      font-family: var(--ff-code);
+      font-size: 12px;
+      color: var(--primary);
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .hero-h { font-family: var(--ff-head); font-size: 44px; font-weight: 800; color: var(--dark); line-height: 1.05; margin-bottom: 14px; }
+    .hero-h span { color: var(--primary); }
+    .hero-p { font-size: 16px; color: var(--text); line-height: 1.7; max-width: 500px; margin-bottom: 28px; }
+
+    .stats { display: flex; gap: 28px; }
+    .stat-n { font-family: var(--ff-head); font-size: 30px; font-weight: 800; color: var(--primary); }
+    .stat-l { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+    .hero-code { background: var(--dark); border-radius: var(--r-lg); padding: 20px 22px; min-width: 280px; }
+    .cl { font-family: var(--ff-code); font-size: 12.5px; line-height: 1.9; }
+    .cm { color: #64748b; }
+    .kw { color: #f472b6; }
+    .st { color: #a3e635; }
+    .pr { color: #93c5fd; }
+    .vl { color: #fb923c; }
+
+    /* ==============================
+   LAYOUT DIAGRAM
+   ============================== */
+    .layout-diagram {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--sh-md);
+    }
+
+    .ld-chrome {
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 7px;
+    }
+
+    .ld-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .ld-dot.r { background: #f87171; }
+    .ld-dot.y { background: #fbbf24; }
+    .ld-dot.g { background: #4ade80; }
+
+    .ld-body { padding: 20px; display: flex; flex-direction: column; gap: 11px; }
+
+    .ld-bar {
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-family: var(--ff-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .ld-bar.mode { background: var(--dark); color: #fff; }
+    .ld-bar.step { background: var(--primary-light); color: var(--primary); border: 1px solid #86efac; }
+    .ld-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
+
+    .ld-panel {
+      border-radius: 10px;
+      padding: 14px;
+      font-family: var(--ff-head);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      min-height: 90px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ld-panel.left { background: #eff6ff; border: 1px solid #bfdbfe; color: #1d4ed8; }
+    .ld-panel.right { background: #fdf4ff; border: 1px solid #e9d5ff; color: #7c3aed; }
+    .ld-panel-sub { font-family: var(--ff-body); font-size: 11px; font-weight: 400; opacity: .75; text-transform: none; letter-spacing: 0; }
+    .ld-badge { font-family: var(--ff-code); font-size: 9px; background: rgba(0,0,0,.08); padding: 2px 7px; border-radius: 4px; display: inline-block; margin-top: auto; }
+
+    /* ==============================
+   ANNOTATIONS
+   ============================== */
+    .ann-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .ann {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 14px 16px;
+    }
+
+    .ann-t { font-family: var(--ff-head); font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 5px; }
+    .ann-d { font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+
+    .ann-code {
+      font-family: var(--ff-code);
+      font-size: 10.5px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 11px;
+      margin-top: 9px;
+      color: #475569;
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    .demo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+
+    /* ==============================
+   STEPPER
+   ============================== */
+    .stepper {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: var(--sh-md);
+    }
+
+    .step-dots {
+      display: flex;
+      align-items: center;
+      padding: 18px 22px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      gap: 0;
+    }
+
+    .sdot { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
+
+    .sdot-circle {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--ff-head);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all .3s;
+      flex-shrink: 0;
+    }
+
+    .sdot.active .sdot-circle { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .sdot.done .sdot-circle { background: #dcfce7; border-color: #86efac; color: #16a34a; }
+
+    .sdot-lbl {
+      font-family: var(--ff-head);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      white-space: nowrap;
+    }
+
+    .sdot.active .sdot-lbl { color: var(--primary); }
+    .sdot.done .sdot-lbl { color: #16a34a; }
+
+    .sconn { flex: 1; height: 1px; min-width: 12px; background: var(--border); margin: 0 6px; }
+
+    .step-body { padding: 28px 26px; min-height: 200px; display: none; }
+    .step-body.active { display: block; }
+
+    .step-title { font-family: var(--ff-head); font-size: 17px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .step-desc { font-size: 13.5px; color: var(--text-muted); margin-bottom: 18px; }
+
+    .step-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 26px;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .sbtn { padding: 9px 18px; border-radius: 10px; font-family: var(--ff-body); font-size: 13.5px; font-weight: 600; border: none; transition: all .2s; }
+    .sbtn-prev { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .sbtn-prev:hover { background: var(--bg); }
+    .sbtn-next { background: var(--gradient-primary); color: #fff; }
+    .sbtn-next:hover { background: var(--gradient-primary-hover); }
+    .sbtn:disabled { background: var(--border); color: var(--text-muted); }
+
+    /* ==============================
+   RENDERER GRID
+   ============================== */
+    .renderer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .renderer-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 16px;
+      transition: box-shadow .2s, transform .2s;
+    }
+
+    .renderer-card:hover { box-shadow: var(--sh-brand); transform: translateY(-1px); }
+
+    .rc-type {
+      font-family: var(--ff-code);
+      font-size: 10px;
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 2px 8px;
+      border-radius: var(--r-full);
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+
+    .rc-name { font-family: var(--ff-head); font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+    .rc-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+    /* ==============================
+   FIELD REGISTRY TABLE
+   ============================== */
+    .field-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--sh-sm);
+    }
+
+    .field-table th {
+      font-family: var(--ff-code);
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 11px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+    }
+
+    .field-table td {
+      padding: 10px 16px;
+      font-family: var(--ff-code);
+      font-size: 11px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    .field-table tr:last-child td { border-bottom: none; }
+
+    .field-table tr:hover td { background: var(--bg); }
+
+    .ft-key { color: #7c3aed; font-weight: 600; }
+    .ft-type { color: var(--primary); }
+    .ft-payload { color: #0284c7; }
+    .ft-note { font-family: var(--ff-body); font-size: 11px; color: var(--text-muted); }
+
+    .ft-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-family: var(--ff-code);
+      font-size: 9px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-weight: 600;
+    }
+
+    .ft-badge.h { background: #fff7ed; color: #c2410c; }
+    .ft-badge.c { background: #eff6ff; color: #1d4ed8; }
+    .ft-badge.m { background: #fdf4ff; color: #7c3aed; }
+
+    /* ==============================
+   LOGIC BOX
+   ============================== */
+    .logic-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 22px 26px;
+      overflow-x: auto;
+    }
+
+    .logic-pre { font-family: var(--ff-code); font-size: 12.5px; line-height: 1.9; color: var(--text); white-space: pre; }
+
+    .chip { display: inline; padding: 1px 8px; border-radius: 4px; font-size: 11.5px; font-weight: 600; font-family: var(--ff-code); }
+    .c-ok { background: #dcfce7; color: #16a34a; }
+    .c-fb { background: #fef3c7; color: #92400e; }
+    .c-pu { background: var(--primary-light); color: var(--primary); }
+    .c-rd { background: #fee2e2; color: #dc2626; }
+    .c-gr { background: #f1f5f9; color: #64748b; }
+    .c-bl { background: #eff6ff; color: #1d4ed8; }
+
+    .chips-legend { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 22px; }
+
+    /* ==============================
+   REVEAL
+   ============================== */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
+    .reveal.vis { opacity: 1; transform: translateY(0); }
+
+    /* ==============================
+   FOOTER
+   ============================== */
+    .footer { background: var(--dark); color: #64748b; text-align: center; padding: 28px 24px; font-size: 12.5px; }
+    .footer strong { color: var(--primary); }
+
+    /* ==============================
+   RESPONSIVE
+   ============================== */
+    @media(max-width:768px) {
+      .hero-grid, .demo-grid { grid-template-columns: 1fr; }
+      .hero-code { display: none; }
+      .ld-panels { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Custom cursor -->
+  <div id="cur-dot"></div>
+  <div id="cur-ring"></div>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <div class="nav-left">
+      <div class="nav-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+          <path d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      </div>
+      <span class="nav-name">ShareAi</span>
+      <span class="nav-pill">VisualDynamicInputV2.jsx</span>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-eyebrow">// System Documentation</p>
+          <h1 class="hero-h">Visual<span>Generation</span><br>System</h1>
+          <p class="hero-p">A dynamic, mode-aware visual generation wizard. The parent passes a <code>requiredUI</code>
+            array of field keys; the system normalises them, assigns each to a step, and renders the
+            correct input type — with a live preview panel always in sync.</p>
+          <div class="stats">
+            <div>
+              <div class="stat-n">5</div>
+              <div class="stat-l">Components</div>
+            </div>
+            <div>
+              <div class="stat-n">8</div>
+              <div class="stat-l">Renderer Types</div>
+            </div>
+            <div>
+              <div class="stat-n">4</div>
+              <div class="stat-l">Flow Steps</div>
+            </div>
+            <div>
+              <div class="stat-n">30+</div>
+              <div class="stat-l">Field Keys</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-code">
+          <div class="cl"><span class="cm">// Entry point</span></div>
+          <div class="cl"><span class="kw">import</span> <span class="pr">VisualDynamicInputV2</span></div>
+          <div class="cl">&nbsp;&nbsp;<span class="kw">from</span> <span class="st">'@/components/hq/components/uploadArea/VisualDynamicInputV2'</span></div>
+          <br>
+          <div class="cl"><span class="cm">// Key props</span></div>
+          <div class="cl"><span class="pr">requiredUI</span> <span class="cm">→ normalise → entries</span></div>
+          <div class="cl"><span class="pr">fieldValues</span> <span class="cm">→ controlled state</span></div>
+          <div class="cl"><span class="pr">onFieldChange</span> <span class="cm">→ parent dispatch</span></div>
+          <div class="cl"><span class="vl">onGenerate</span> <span class="cm">→ async → API call</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================
+   SECTION 1 — LAYOUT STRUCTURE
+   ============================= -->
+  <div class="sec reveal" id="s1">
+    <div class="wrap">
+      <div class="sec-hd">
+        <p class="sec-label">01 — Layout Structure</p>
+        <h2 class="sec-title">Component Hierarchy</h2>
+        <p class="sec-desc">All five sub-components are orchestrated by <code>VisualDynamicInputV2</code>.
+          State never leaks into children — everything flows down via props and up via callbacks.</p>
+      </div>
+
+      <div class="demo-grid">
+        <!-- Layout diagram -->
+        <div class="layout-diagram">
+          <div class="ld-chrome">
+            <div class="ld-dot r"></div>
+            <div class="ld-dot y"></div>
+            <div class="ld-dot g"></div>
+          </div>
+          <div class="ld-body">
+            <div class="ld-bar mode">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+              ModeTitleBar
+            </div>
+            <div class="ld-bar step">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              StepNavBar — computed from stepSequence[]
+            </div>
+            <div class="ld-panels">
+              <div class="ld-panel left">
+                LeftPanel
+                <div class="ld-panel-sub">Renders the active step card (image / settings / optional)</div>
+                <div class="ld-badge">.vg-left-panel</div>
+              </div>
+              <div class="ld-panel right">
+                RightPanel
+                <div class="ld-panel-sub">Canvas preview + value summary + Generate button</div>
+                <div class="ld-badge">.vg-right-panel</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Annotations -->
+        <div class="ann-list">
+          <div class="ann">
+            <div class="ann-t">VisualDynamicInputV2</div>
+            <div class="ann-d">Master orchestrator. Receives <code>requiredUI[]</code> from the parent, normalises entries, computes step buckets, owns all state, and passes render props down. Returns <code>null</code> if <code>visibleEntries</code> is empty.</div>
+            <div class="ann-code">path: src/components/hq/components/uploadArea/VisualDynamicInputV2.jsx
+className: .vg-layout</div>
+          </div>
+          <div class="ann">
+            <div class="ann-t">ModeTitleBar</div>
+            <div class="ann-d">Fixed title strip showing current generation mode name and a back button. Calls <code>onBack</code> which navigates up in the parent.</div>
+            <div class="ann-code">props: currentMode (string), onBack (fn)
+className: .vg-mode-title-bar</div>
+          </div>
+          <div class="ann">
+            <div class="ann-t">StepNavBar</div>
+            <div class="ann-d">Horizontal step indicator. <code>steps</code> is the dynamic <code>stepSequence[]</code> array. Clicking a done step jumps to it via <code>goStep</code>. The "Generate" step is locked if <code>!canGenerate</code>.</div>
+            <div class="ann-code">activeStep: isMerging ? totalSteps : activeStep
+states: pending | active | done</div>
+          </div>
+          <div class="ann">
+            <div class="ann-t">isMerging state</div>
+            <div class="ann-d">When the user clicks "Review & Generate", <code>isMerging</code> flips to <code>true</code>. The left panel hides and the right panel expands full-width (<code>.vg-panels-row.merging</code>). "Back to Edit" restores the previous step.</div>
+            <div class="ann-code">vg-panels-row           → side-by-side
+vg-panels-row.merging   → right panel full-width</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================
+   SECTION 2 — DYNAMIC STEP FLOW
+   ============================= -->
+  <div class="sec reveal" id="s2">
+    <div class="wrap">
+      <div class="sec-hd">
+        <p class="sec-label">02 — Dynamic Step Flow</p>
+        <h2 class="sec-title">4-Step Wizard</h2>
+        <p class="sec-desc">Steps are computed at runtime from the normalised field list —
+          only steps that have at least one field appear. The <strong>Generate</strong> step always appears last and
+          maps to the <code>isMerging</code> review state.
+        </p>
+      </div>
+
+      <div class="stepper">
+        <div class="step-dots" id="stepDots"></div>
+
+        <!-- Step 0: Image -->
+        <div class="step-body active" data-s="0">
+          <div class="step-title">Image <span style="font-size:11px;font-family:var(--ff-code);color:var(--text-muted);font-weight:400;">(conditional step)</span></div>
+          <div class="step-desc">Only present when <code>requiredUI</code> contains an <code>image-upload</code>
+            or <code>image-select</code> field. Renders the <strong>Image Reference Source</strong> card
+            with watermark <code>01</code>. This step is always optional — "Continue" is never disabled here.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span class="chip c-bl">inputType === 'image-upload'  →  step 1</span>
+            <span class="chip c-bl">inputType === 'image-select'  →  step 1</span>
+          </div>
+          <p style="margin-top:14px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+            rendered by: <span style="color:var(--primary)">ImageUploadRenderer</span> | <span style="color:var(--primary)">ImageSelectRenderer</span>
+          </p>
+        </div>
+
+        <!-- Step 1: Settings -->
+        <div class="step-body" data-s="1">
+          <div class="step-title">Settings</div>
+          <div class="step-desc">Required fields — pill selects and text inputs that must be filled before the user
+            can advance. Renders the <strong>Settings</strong> card with watermark <code>02</code>.
+            "Continue" is disabled until <code>isStep2Complete</code> is <code>true</code>.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span class="chip c-bl">CHOICE_TYPE fields with options.length → must have value</span>
+            <span class="chip c-bl">TEXT_LIKE fields (required !== false) → must be non-empty</span>
+          </div>
+          <p style="margin-top:14px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+            <span style="color:var(--primary)">isStep2Complete</span> also returns <code>false</code> while <span style="color:var(--primary)">isFetching</span> is <code>true</code>
+          </p>
+        </div>
+
+        <!-- Step 2: Optional -->
+        <div class="step-body" data-s="2">
+          <div class="step-title">Optional Details <span style="font-size:11px;font-family:var(--ff-code);color:var(--text-muted);font-weight:400;">(conditional step)</span></div>
+          <div class="step-desc">Only present when any field in <code>requiredUI</code> has <code>required === false</code>
+            or is a <code>TEXT_LIKE</code> type without an explicit <code>required: true</code>.
+            Renders the <strong>Optional Details</strong> card with watermark <code>03</code>.</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;">
+            <span class="chip c-gr">required === false  →  step 3</span>
+            <span class="chip c-gr">TEXT_LIKE + no explicit required  →  step 3</span>
+          </div>
+          <p style="margin-top:14px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+            "Review &amp; Generate" button: disabled when <code>!canGenerate</code>
+          </p>
+        </div>
+
+        <!-- Step 3: Generate -->
+        <div class="step-body" data-s="3">
+          <div class="step-title">Generate</div>
+          <div class="step-desc">Not a traditional form step — clicking it calls <code>goStep(totalSteps)</code>
+            which sets <code>isMerging = true</code>. The right panel expands full-width showing the
+            image preview, all field values, and the main <strong>Generate Visual Series</strong> CTA.
+          </div>
+          <p style="font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);margin-bottom:10px;">
+            <span style="color:var(--primary)">handleGenerate()</span> → await <span style="color:var(--primary)">onGenerate()</span> → sets <span style="color:var(--primary)">hasGenerated=true</span>
+          </p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="chip c-ok">result !== false  →  hasGenerated = true</span>
+            <span class="chip c-rd">canGenerate = false  →  button disabled</span>
+          </div>
+        </div>
+
+        <div class="step-foot">
+          <button class="sbtn sbtn-prev" id="prevBtn" onclick="prevStep()" disabled>← Back</button>
+          <span id="stepLbl" style="font-family:var(--ff-code);font-size:11.5px;color:var(--text-muted);">Step 1 of 4</span>
+          <button class="sbtn sbtn-next" id="nextBtn" onclick="nextStep()">Next →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================
+   SECTION 3 — INPUT RENDERERS
+   ============================= -->
+  <div class="sec reveal" id="s3">
+    <div class="wrap">
+      <div class="sec-hd">
+        <p class="sec-label">03 — Input Renderers</p>
+        <h2 class="sec-title">8 Renderer Types</h2>
+        <p class="sec-desc">Exported from <code>visualInputRenderers.jsx</code> and mapped in <code>INPUT_RENDERERS</code>.
+          <code>VisualDynamicInputV2</code> calls <code>renderField(entry)</code>, which picks the correct renderer
+          by <code>entry.inputType</code>. Unknown types fall back to <code>UnsupportedFieldRenderer</code>.</p>
+      </div>
+
+      <div class="renderer-grid">
+        <div class="renderer-card">
+          <div class="rc-type">image-upload</div>
+          <div class="rc-name">ImageUploadRenderer</div>
+          <div class="rc-desc">Renders <code>ImageUploadWithPreview</code> with a counter. Reads
+            <code>selectedImages</code>, <code>imagePreviews</code>, <code>maxRequiredImages</code>,
+            and <code>minRequiredImages</code> from context. Always assigned to step 1.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">image-select</div>
+          <div class="rc-name">ImageSelectRenderer</div>
+          <div class="rc-desc">Grid of previously-generated visuals fetched from
+            <code>getGeneratedVisualContent</code> by <code>industryCode</code>.
+            Selected URLs are converted to <code>File</code> objects via <code>convertGeneratedImageUrlsToFiles</code>.
+            A <strong>Refresh</strong> button re-queries the API.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">image-grid-square</div>
+          <div class="rc-name">ImageGridRenderer</div>
+          <div class="rc-desc">Renders <code>SelectionGrid</code> in <code>square</code> aspect ratio.
+            Supports <code>modelPreview</code> config to overlay assembled model images
+            (race × gender × age × hair) from <code>public/assets</code>.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">image-grid-portrait</div>
+          <div class="rc-name">ImageGridRenderer</div>
+          <div class="rc-desc">Same as above but <code>SelectionGrid</code> uses <code>portrait</code>
+            aspect ratio. Used for modes where tall imagery is more natural (e.g. model photos).</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">pill-select</div>
+          <div class="rc-name">PillSelectRenderer</div>
+          <div class="rc-desc">Horizontal pill buttons. Options resolved from
+            <code>field.optionSource</code> (e.g. <code>styleOptions</code>, <code>angleOptions</code>)
+            or a static <code>field.options</code> array. Applies <code>.vg-opt-pill</code> CSS in
+            visual-generator flow context.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">text</div>
+          <div class="rc-name">TextRenderer</div>
+          <div class="rc-desc">Wraps <code>StringInput</code>. Applies a 20-word limit via
+            <code>applyWordLimit()</code> on every change. Falls back to <code>TEXT_INPUT_FALLBACKS</code>
+            for label and placeholder when the field config omits them.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">textarea</div>
+          <div class="rc-name">TextAreaRenderer</div>
+          <div class="rc-desc">Ant Design <code>Input.TextArea</code> with 4 rows. Same 20-word cap
+            as the text renderer. Used for longer freeform fields like <code>about</code> and
+            <code>description</code>.</div>
+        </div>
+        <div class="renderer-card">
+          <div class="rc-type">color</div>
+          <div class="rc-name">ColorRenderer</div>
+          <div class="rc-desc">A native <code>&lt;input type="color"&gt;</code> swatch paired with an
+            Ant Design text input for manual hex entry. Validates the hex pattern
+            <code>/^#[0-9A-Fa-f]{6}$/</code> before passing to the color swatch.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================
+   SECTION 4 — FIELD CONFIG REGISTRY
+   ============================= -->
+  <div class="sec reveal" id="s4">
+    <div class="wrap">
+      <div class="sec-hd">
+        <p class="sec-label">04 — Field Config Registry</p>
+        <h2 class="sec-title">VISUAL_INPUT_FIELDS</h2>
+        <p class="sec-desc">Defined in <code>src/constants/visualInputFields.js</code>, keyed by
+          <code>StepKey</code>. The parent passes raw key strings in <code>requiredUI[]</code>;
+          <code>normalizeRequiredUI()</code> looks each up here to get <code>inputType</code>,
+          <code>label</code>, <code>payloadKey</code>, and any special behaviours.</p>
+      </div>
+
+      <div style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:8px;">
+        <span class="ft-badge h">hideWhen</span>
+        <span style="font-size:12px;color:var(--text-muted)">— field hidden when another field matches a value</span>
+        <span class="ft-badge c" style="margin-left:16px;">cascadeReset</span>
+        <span style="font-size:12px;color:var(--text-muted)">— dependent fields cleared when this changes</span>
+        <span class="ft-badge m" style="margin-left:16px;">modelPreview</span>
+        <span style="font-size:12px;color:var(--text-muted)">— drives RightPanel model image assembly</span>
+      </div>
+
+      <table class="field-table">
+        <thead>
+          <tr>
+            <th>Key (StepKey)</th>
+            <th>inputType</th>
+            <th>payloadKey</th>
+            <th>Flags</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="ft-key">upload</td><td class="ft-type">image-upload</td><td style="color:#94a3b8">—</td><td></td><td class="ft-note">Upload 1-N reference photos</td></tr>
+          <tr><td class="ft-key">select_image</td><td class="ft-type">image-select</td><td style="color:#94a3b8">—</td><td></td><td class="ft-note">Pick from generated visuals library; needs <code>industryCode</code></td></tr>
+          <tr><td class="ft-key">param</td><td class="ft-type">pill-select</td><td class="ft-payload">type</td><td></td><td class="ft-note">Style; options from <code>styleOptions</code>; <code>payloadMode:'manual'</code></td></tr>
+          <tr><td class="ft-key">camera</td><td class="ft-type">pill-select</td><td class="ft-payload">mode</td><td></td><td class="ft-note">Camera angle; options from <code>angleOptions</code></td></tr>
+          <tr><td class="ft-key">ratio</td><td class="ft-type">pill-select</td><td class="ft-payload">ratio</td><td></td><td class="ft-note">Output aspect ratio; options translated via i18n</td></tr>
+          <tr><td class="ft-key">unit</td><td class="ft-type">pill-select</td><td class="ft-payload">unit</td><td></td><td class="ft-note">Unit selector; from <code>unitConfig.options</code></td></tr>
+          <tr><td class="ft-key">style</td><td class="ft-type">pill-select</td><td class="ft-payload">style</td><td></td><td class="ft-note">Interior style; from <code>styleConfig.options</code></td></tr>
+          <tr><td class="ft-key">flooring</td><td class="ft-type">pill-select</td><td class="ft-payload">flooring</td><td></td><td class="ft-note">Flooring type; from <code>flooringConfig.options</code></td></tr>
+          <tr><td class="ft-key">view1 / view2 / view3 / view4</td><td class="ft-type">pill-select</td><td class="ft-payload">view1–view4</td><td></td><td class="ft-note">Up to 4 viewpoint selectors</td></tr>
+          <tr><td class="ft-key">content</td><td class="ft-type">pill-select</td><td class="ft-payload">content</td><td></td><td class="ft-note">Content type; from <code>contentConfig.options</code></td></tr>
+          <tr><td class="ft-key">title</td><td class="ft-type">text</td><td class="ft-payload">title</td><td><span class="ft-badge h">hideWhen</span></td><td class="ft-note">Hidden when <code>content === 'auto'</code></td></tr>
+          <tr><td class="ft-key">subtitle</td><td class="ft-type">text</td><td class="ft-payload">subtitle</td><td><span class="ft-badge h">hideWhen</span></td><td class="ft-note">Hidden when <code>content === 'auto'</code></td></tr>
+          <tr><td class="ft-key">company_name</td><td class="ft-type">text</td><td class="ft-payload">companyName</td><td></td><td class="ft-note">20-word cap</td></tr>
+          <tr><td class="ft-key">website / info / notes</td><td class="ft-type">text</td><td class="ft-payload">website / info / notes</td><td></td><td class="ft-note">Single-line free text; <code>notes</code> labeled "Website Link"</td></tr>
+          <tr><td class="ft-key">theme / background / costume</td><td class="ft-type">text</td><td class="ft-payload">theme / background / costume</td><td></td><td class="ft-note">Creative direction free text</td></tr>
+          <tr><td class="ft-key">about / description</td><td class="ft-type">textarea</td><td class="ft-payload">about / description</td><td></td><td class="ft-note">Multi-line; 20-word cap</td></tr>
+          <tr><td class="ft-key">corporate_color</td><td class="ft-type">color</td><td class="ft-payload">corporateColor</td><td></td><td class="ft-note">Hex color swatch + text input</td></tr>
+          <tr><td class="ft-key">race</td><td class="ft-type">pill-select</td><td class="ft-payload">race</td><td><span class="ft-badge c">cascadeReset</span> <span class="ft-badge m">modelPreview</span></td><td class="ft-note">Resets gender, age, hair; builds model image</td></tr>
+          <tr><td class="ft-key">gender</td><td class="ft-type">pill-select</td><td class="ft-payload">gender</td><td><span class="ft-badge c">cascadeReset</span> <span class="ft-badge m">modelPreview</span></td><td class="ft-note">Resets age, hair</td></tr>
+          <tr><td class="ft-key">age</td><td class="ft-type">pill-select</td><td class="ft-payload">age</td><td><span class="ft-badge c">cascadeReset</span> <span class="ft-badge m">modelPreview</span></td><td class="ft-note">Resets hair</td></tr>
+          <tr><td class="ft-key">hair</td><td class="ft-type">pill-select</td><td class="ft-payload">hair</td><td><span class="ft-badge m">modelPreview</span></td><td class="ft-note">Terminal in model cascade</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- =============================
+   SECTION 5 — STATE & LOGIC
+   ============================= -->
+  <div class="sec reveal" id="s5">
+    <div class="wrap">
+      <div class="sec-hd">
+        <p class="sec-label">05 — State &amp; Logic</p>
+        <h2 class="sec-title">Data Flow &amp; Key Algorithms</h2>
+        <p class="sec-desc">How <code>requiredUI[]</code> becomes a rendered wizard — and how the
+          <code>canGenerate</code> flag, field visibility, and the right panel stay in sync.</p>
+      </div>
+
+      <div class="chips-legend">
+        <span class="chip c-ok">step 1 — image</span>
+        <span class="chip c-bl">step 2 — settings</span>
+        <span class="chip c-gr">step 3 — optional</span>
+        <span class="chip c-pu">canGenerate = true</span>
+        <span class="chip c-rd">canGenerate = false</span>
+      </div>
+
+      <div class="logic-box">
+        <pre class="logic-pre"><span style="color:#7c3aed;font-weight:700">normalizeRequiredUI</span>(<span style="color:#0284c7">requiredUI</span>)
+  <span style="color:#94a3b8">// Accepts string[] | { key, label?, required?, options?, industryCode? }[]</span>
+  <span style="color:#94a3b8">// Looks up each key in VISUAL_INPUT_FIELDS for inputType, label, placeholder, etc.</span>
+  <span style="color:#94a3b8">// Sets entry.isUnknown = true and logs a console.warn for unrecognised keys</span>
+  → <span style="color:#0284c7">requiredEntries[]</span>   (memoised on requiredUI)
+
+
+<span style="color:#7c3aed;font-weight:700">visibleEntries</span> = requiredEntries
+  <span style="color:#94a3b8">// Filter 1: hideWhen — if entry.hideWhen.key === hideWhen.value, entry is excluded</span>
+  .filter(entry ⇒ !(entry.hideWhen &amp;&amp; fieldValues[entry.hideWhen.key] === entry.hideWhen.value))
+  <span style="color:#94a3b8">// Filter 2: dedup — entries with the same id appear only once</span>
+  .dedup(entry.id)
+
+
+<span style="color:#7c3aed;font-weight:700">getFieldStep</span>(<span style="color:#0284c7">entry</span>)
+  ├─ inputType === IMAGE_UPLOAD | IMAGE_SELECT  →  <span class="chip c-ok">step 1</span>
+  ├─ entry.required === false                  →  <span class="chip c-gr">step 3</span>
+  ├─ TEXT_LIKE + required === true             →  <span class="chip c-bl">step 2</span>
+  └─ everything else (CHOICE_TYPES, etc.)      →  <span class="chip c-bl">step 2</span>
+
+
+<span style="color:#7c3aed;font-weight:700">stepSequence</span> (dynamic)
+  if (imageFields.length)    push  { id: 'image',    label: 'Image' }
+  if (requiredFields.length) push  { id: 'settings', label: 'Settings' }
+  if (optionalFields.length) push  { id: 'optional', label: 'Optional' }
+                             push  { id: 'generate', label: 'Generate' }  <span style="color:#94a3b8">// always last</span>
+
+
+<span style="color:#7c3aed;font-weight:700">isStep2Complete</span>
+  ├─ isFetching → <span class="chip c-rd">false</span>
+  ├─ CHOICE_TYPE field + options.length &gt; 0 + no value → <span class="chip c-rd">false</span>
+  ├─ TEXT_LIKE field + empty string → <span class="chip c-rd">false</span>
+  └─ all pass → <span class="chip c-ok">true</span>
+
+<span style="color:#7c3aed;font-weight:700">canGenerate</span>
+  isStep2Complete
+  &amp;&amp; !selectImagePreparing          <span style="color:#94a3b8">// image-select URLs still being converted to Files</span>
+  &amp;&amp; (imageFields.length === 0 || hasMinImages)   → <span class="chip c-pu">canGenerate = true</span>
+
+
+<span style="color:#7c3aed;font-weight:700">modelPreviewUrl</span>  (RightPanel)
+  <span style="color:#94a3b8">// Reads fieldValues.race, .gender, .age, .hair</span>
+  <span style="color:#94a3b8">// Builds: Assets[`${race}_${g}_${a}_${h}`] from public/assets</span>
+  <span style="color:#94a3b8">// Defaults: gender='F', age='21', hair='L' when a field is unset</span>
+  → image URL | null   (shown in RightPanel under "Model Preview")
+
+<span style="color:#7c3aed;font-weight:700">stylePreviewUrl</span>  (RightPanel)
+  <span style="color:#94a3b8">// Reads fieldValues.param, finds matching option in styleOptions[]</span>
+  → option.previewImage | null   (shown in RightPanel under "Style Preview")
+
+
+<span style="color:#7c3aed;font-weight:700">navigateToField</span>(<span style="color:#0284c7">key</span>, <span style="color:#0284c7">step</span>)
+  <span style="color:#94a3b8">// Fired when user clicks a value chip in RightPanel</span>
+  setIsMerging(false) → setActiveStep(step)
+  setTimeout(80ms) → fieldRowRefs[key].scrollIntoView({ behavior:'smooth' })
+                   → el.classList.add('shining')   <span style="color:#94a3b8">// 1600ms highlight animation</span>
+
+
+<span style="color:#7c3aed;font-weight:700">preloadUrl effect</span>
+  <span style="color:#94a3b8">// If preloadUrl prop is set AND selectImageUrls have loaded AND url is in the list:</span>
+  toggleSelectImageUrl(preloadUrl)   <span style="color:#94a3b8">// auto-selects it</span>
+  appliedPreloadUrl.current = preloadUrl   <span style="color:#94a3b8">// prevents re-application on re-render</span>
+
+
+<span style="color:#94a3b8">// Reset effects</span>
+<span style="color:#94a3b8">// When requiredUI changes (mode switch): all step state, selections, and generate flags reset</span>
+<span style="color:#94a3b8">// When activeStep > totalSteps (dynamic step removal): clamped back to step 1</span>
+</pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <strong>ShareAi</strong> — Visual Generation System &nbsp;·&nbsp;
+    <code style="font-size:11px;color:#475569;">VisualDynamicInputV2.jsx → LeftPanel → RightPanel → visualInputRenderers.jsx → visualInputFields.js</code>
+  </footer>
+
+  <script>
+    // ===========================
+    // Custom cursor
+    // ===========================
+    const dot = document.getElementById('cur-dot');
+    const ring = document.getElementById('cur-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+
+    document.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx + 'px';
+      dot.style.top = my + 'px';
+    });
+
+    (function animRing() {
+      rx += (mx - rx) * 0.14;
+      ry += (my - ry) * 0.14;
+      ring.style.left = rx + 'px';
+      ring.style.top = ry + 'px';
+      requestAnimationFrame(animRing);
+    })();
+
+    document.querySelectorAll('button, .renderer-card, .ann, .field-table tr').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cur-big'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cur-big'));
+    });
+
+    // ===========================
+    // Stepper
+    // ===========================
+    const STEPS = ['Image', 'Settings', 'Optional', 'Generate'];
+    let cur = 0;
+
+    function buildDots() {
+      const c = document.getElementById('stepDots');
+      c.innerHTML = '';
+      STEPS.forEach((s, i) => {
+        const d = document.createElement('div');
+        d.className = 'sdot' + (i === cur ? ' active' : i < cur ? ' done' : '');
+        d.innerHTML = `<div class="sdot-circle">${i < cur ? '✓' : i + 1}</div><span class="sdot-lbl">${s}</span>`;
+        if (i < cur) d.onclick = () => jump(i);
+        c.appendChild(d);
+        if (i < STEPS.length - 1) {
+          const conn = document.createElement('div');
+          conn.className = 'sconn';
+          c.appendChild(conn);
+        }
+      });
+    }
+
+    function show(i) {
+      document.querySelectorAll('.step-body').forEach((el, j) => el.classList.toggle('active', j === i));
+      document.getElementById('stepLbl').textContent = `Step ${i + 1} of ${STEPS.length}`;
+      document.getElementById('prevBtn').disabled = i === 0;
+      const nb = document.getElementById('nextBtn');
+      nb.textContent = i === STEPS.length - 1 ? '✓ Done' : 'Next →';
+      nb.disabled = false;
+      buildDots();
+    }
+
+    function nextStep() { if (cur < STEPS.length - 1) { cur++; show(cur); } }
+    function prevStep() { if (cur > 0) { cur--; show(cur); } }
+    function jump(i) { cur = i; show(cur); }
+
+    buildDots(); show(0);
+
+    // ===========================
+    // Scroll reveal
+    // ===========================
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+  </script>
+</body>
+
+</html>

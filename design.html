@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Share AI — Design System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ─── Reset & Base ──────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    /* Brand Colors */
+    --green-600: #16a34a;
+    --green-500: #22c55e;
+    --green-400: #52C41A;
+    --green-50:  #f0fdf4;
+    --blue-700:  #1d4ed8;
+    --blue-600:  #2563eb;
+    --blue-500:  #3b82f6;
+    --blue-100:  #dbeafe;
+    --red-600:   #dc2626;
+    --red-500:   #ef4444;
+    --red-400:   #FF4D4F;
+    --purple-700:#6d28d9;
+    --purple-400:#AB73FC;
+    --black:     #000000;
+    --gray-900:  #111827;
+    --gray-700:  #374151;
+    --gray-600:  #4B5563;
+    --gray-500:  #6b7280;
+    --gray-400:  #9ca3af;
+    --gray-300:  #d1d5db;
+    --gray-200:  #e5e7eb;
+    --gray-100:  #f3f4f6;
+    --white:     #ffffff;
+
+    /* Gradient */
+    --gradient-primary: linear-gradient(90deg, #16a34a 0%, #2563eb 100%);
+    --gradient-accent:  linear-gradient(90deg, #22c55e 0%, #3b82f6 100%);
+
+    /* Shadows */
+    --shadow-sm:  0 1px 2px rgba(0,0,0,0.05);
+    --shadow-md:  0 1px 3px rgba(0,0,0,0.08);
+    --shadow-lg:  0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    --shadow-hover: 0 -6px 12px rgba(0,0,0,0.08);
+
+    /* Radius */
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 8px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+
+    /* Typography */
+    --font-body:    'Inter', sans-serif;
+    --font-display: 'Syne', sans-serif;
+    --font-mono:    'DM Mono', monospace;
+
+    /* Transitions */
+    --transition-fast:   0.2s ease;
+    --transition-base:   0.3s ease;
+    --transition-slow:   0.5s cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Doc layout */
+    --doc-bg:   #0a0a0f;
+    --doc-surface: #13131a;
+    --doc-border: rgba(255,255,255,0.07);
+    --doc-text:   #e8e8f0;
+    --doc-muted:  #7c7c9a;
+    --doc-accent: #22c55e;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--doc-bg);
+    color: var(--doc-text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ─── Layout ──────────────────────────────────────────────── */
+  .shell {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ─── Sidebar Nav ──────────────────────────────────────────── */
+  .sidenav {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--doc-border);
+    padding: 32px 0;
+    background: var(--doc-surface);
+  }
+
+  .sidenav-logo {
+    padding: 0 20px 28px;
+    border-bottom: 1px solid var(--doc-border);
+    margin-bottom: 16px;
+  }
+
+  .sidenav-logo .wordmark {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    background: var(--gradient-accent);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .sidenav-logo .tagline {
+    font-size: 10px;
+    color: var(--doc-muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .nav-section-label {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    font-weight: 500;
+    color: var(--doc-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 12px 20px 4px;
+    margin-top: 8px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 20px;
+    font-size: 12.5px;
+    color: var(--doc-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast), background var(--transition-fast);
+    border-left: 2px solid transparent;
+  }
+
+  .nav-link:hover {
+    color: var(--doc-text);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .nav-link.active {
+    color: var(--doc-accent);
+    border-left-color: var(--doc-accent);
+    background: rgba(34,197,94,0.06);
+  }
+
+  .nav-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+    opacity: 0.5;
+  }
+
+  /* ─── Main Content ──────────────────────────────────────────── */
+  .main {
+    padding: 0 48px 80px;
+    max-width: 900px;
+  }
+
+  /* ─── Page Hero ──────────────────────────────────────────────── */
+  .hero {
+    padding: 64px 0 48px;
+    border-bottom: 1px solid var(--doc-border);
+    margin-bottom: 64px;
+  }
+
+  .hero-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--doc-accent);
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 0%, #7c7c9a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    color: var(--doc-muted);
+    font-size: 14px;
+    max-width: 480px;
+    line-height: 1.7;
+  }
+
+  /* ─── Section ──────────────────────────────────────────────── */
+  .section {
+    margin-bottom: 72px;
+    scroll-margin-top: 32px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--doc-border);
+  }
+
+  .section-num {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--doc-muted);
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .section-desc {
+    color: var(--doc-muted);
+    font-size: 13px;
+    margin-bottom: 24px;
+    line-height: 1.7;
+  }
+
+  /* ─── Sub-section ──────────────────────────────────────────── */
+  .sub-title {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--doc-muted);
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  /* ─── Color Swatches ──────────────────────────────────────── */
+  .swatch-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .swatch {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--doc-border);
+  }
+
+  .swatch-color {
+    height: 64px;
+    width: 100%;
+  }
+
+  .swatch-meta {
+    background: var(--doc-surface);
+    padding: 8px 10px;
+  }
+
+  .swatch-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--doc-text);
+    display: block;
+  }
+
+  .swatch-hex {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--doc-muted);
+    display: block;
+    margin-top: 1px;
+  }
+
+  /* ─── Gradient Row ──────────────────────────────────────────── */
+  .gradient-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .gradient-swatch {
+    height: 56px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--doc-border);
+    display: flex;
+    align-items: flex-end;
+    padding: 8px 12px;
+  }
+
+  .gradient-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: white;
+    opacity: 0.8;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+
+  /* ─── Typography Specimens ───────────────────────────────────── */
+  .type-specimen {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--radius-xl);
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 20px;
+  }
+
+  .type-specimen .preview {
+    flex: 1;
+  }
+
+  .type-specimen .meta {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--doc-muted);
+    text-align: right;
+    line-height: 1.8;
+    flex-shrink: 0;
+    min-width: 120px;
+  }
+
+  /* ─── Spacing Scale ──────────────────────────────────────────── */
+  .spacing-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--doc-border);
+  }
+
+  .spacing-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--doc-muted);
+    width: 80px;
+    flex-shrink: 0;
+  }
+
+  .spacing-bar {
+    background: var(--gradient-accent);
+    height: 8px;
+    border-radius: 4px;
+    opacity: 0.7;
+  }
+
+  .spacing-value {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--doc-muted);
+    margin-left: auto;
+  }
+
+  /* ─── Radius Scale ───────────────────────────────────────────── */
+  .radius-grid {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .radius-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .radius-box {
+    width: 64px;
+    height: 64px;
+    background: rgba(34,197,94,0.12);
+    border: 2px solid rgba(34,197,94,0.3);
+  }
+
+  .radius-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--doc-muted);
+    text-align: center;
+  }
+
+  /* ─── Shadow Scale ───────────────────────────────────────────── */
+  .shadow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .shadow-item {
+    background: #1c1c27;
+    border-radius: var(--radius-lg);
+    padding: 20px 16px;
+    text-align: center;
+  }
+
+  .shadow-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--doc-muted);
+    margin-top: 8px;
+  }
+
+  /* ─── Button Showcase ──────────────────────────────────────── */
+  .btn-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .ds-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    white-space: nowrap;
+  }
+
+  .ds-btn-sm  { height: 32px; padding: 0 12px; border-radius: var(--radius-md); font-size: 12px; }
+  .ds-btn-md  { height: 36px; padding: 0 16px; border-radius: var(--radius-md); font-size: 13px; }
+  .ds-btn-lg  { height: 44px; padding: 0 20px; border-radius: var(--radius-lg); font-size: 14px; }
+
+  .ds-btn-gradient {
+    background: var(--gradient-primary);
+    color: white;
+  }
+  .ds-btn-gradient:hover { filter: brightness(1.1); }
+
+  .ds-btn-green {
+    background: var(--green-400);
+    color: white;
+  }
+  .ds-btn-green:hover { background: var(--green-600); }
+
+  .ds-btn-blue {
+    background: var(--blue-600);
+    color: white;
+  }
+  .ds-btn-blue:hover { background: var(--blue-700); }
+
+  .ds-btn-red {
+    background: var(--red-600);
+    color: white;
+  }
+  .ds-btn-red:hover { filter: brightness(0.9); }
+
+  .ds-btn-purple {
+    background: var(--purple-400);
+    color: white;
+  }
+
+  .ds-btn-black {
+    background: var(--black);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .ds-btn-outline {
+    background: transparent;
+    color: var(--doc-text);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .ds-btn-outline:hover { background: rgba(255,255,255,0.04); }
+
+  .ds-btn-ghost {
+    background: transparent;
+    color: var(--doc-muted);
+    border: none;
+  }
+  .ds-btn-ghost:hover { background: rgba(255,255,255,0.05); color: var(--doc-text); }
+
+  /* ─── Badge Showcase ─────────────────────────────────────────── */
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .ds-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--radius-full);
+    padding: 2px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-body);
+  }
+
+  .ds-badge-primary    { background: rgba(22,163,74,0.15);  color: var(--green-500); border: 1px solid rgba(22,163,74,0.25); }
+  .ds-badge-blue       { background: rgba(37,99,235,0.15);  color: var(--blue-500);  border: 1px solid rgba(37,99,235,0.25); }
+  .ds-badge-red        { background: rgba(220,38,38,0.15);  color: var(--red-400);   border: 1px solid rgba(220,38,38,0.25); }
+  .ds-badge-purple     { background: rgba(109,40,217,0.15); color: var(--purple-400);border: 1px solid rgba(109,40,217,0.25); }
+  .ds-badge-gray       { background: rgba(156,163,175,0.1); color: var(--gray-400);  border: 1px solid rgba(156,163,175,0.15);}
+  .ds-badge-outline    { background: transparent; color: var(--doc-muted); border: 1px solid var(--doc-border); }
+
+  /* ─── Input Showcase ─────────────────────────────────────────── */
+  .ds-input {
+    width: 100%;
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(214,219,225,0.15);
+    background: rgba(255,255,255,0.04);
+    color: var(--doc-text);
+    font-family: var(--font-body);
+    font-size: 13px;
+    outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    margin-bottom: 10px;
+  }
+  .ds-input:focus {
+    border-color: var(--green-500);
+    box-shadow: 0 0 0 3px rgba(34,197,94,0.15);
+  }
+  .ds-input::placeholder { color: var(--doc-muted); }
+
+  /* ─── Card Showcase ──────────────────────────────────────────── */
+  .ds-card {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    cursor: default;
+  }
+  .ds-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.25);
+  }
+
+  .ds-card-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .ds-card-desc  { font-size: 12px; color: var(--doc-muted); line-height: 1.5; }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  /* ─── Animation Demo ─────────────────────────────────────────── */
+  .anim-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .anim-demo {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--radius-lg);
+    padding: 20px 12px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--doc-muted);
+    font-family: var(--font-mono);
+    overflow: hidden;
+  }
+
+  .anim-box {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--gradient-accent);
+    margin: 0 auto 12px;
+    opacity: 0.8;
+  }
+
+  /* Individual animations */
+  @keyframes fadeIn  { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes float   { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+  @keyframes hlFlash { 0% { background: linear-gradient(90deg,#22c55e33,#3b82f633); } 100% { background: transparent; } }
+  @keyframes slideIn { from { transform: translateX(-16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  @keyframes pulse   { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  @keyframes spin    { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  .anim-fade-in  { animation: fadeIn  0.4s ease both; }
+  .anim-float    { animation: float   3s  ease-in-out infinite; }
+  .anim-flash    { animation: hlFlash 2s  ease-out infinite; border-radius: var(--radius-md); }
+  .anim-slide    { animation: slideIn 0.4s ease both; }
+  .anim-pulse    { animation: pulse   1.5s ease-in-out infinite; }
+  .anim-spin     { animation: spin    1s  linear infinite; border-radius: 50%; }
+
+  /* Trigger hover re-play trick */
+  .anim-demo:hover .anim-fade-in  { animation: none; }
+  .anim-demo:hover .anim-fade-in  { animation: fadeIn 0.4s ease both; }
+
+  /* ─── Sidebar State Demo ─────────────────────────────────────── */
+  .sidebar-demo {
+    background: var(--doc-surface);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+
+  .sidebar-demo-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all var(--transition-fast);
+    color: var(--doc-muted);
+  }
+
+  .sidebar-demo-item:hover {
+    color: var(--gray-900);
+    background: rgba(249,250,251,0.05);
+  }
+
+  .sidebar-demo-item.active {
+    color: #16a34a;
+    background: rgba(240,253,244,0.08);
+    border-left-color: #16a34a;
+    font-weight: 500;
+  }
+
+  .sidebar-demo-icon {
+    width: 16px; height: 16px;
+    border-radius: 3px;
+    background: currentColor;
+    opacity: 0.4;
+    flex-shrink: 0;
+  }
+
+  /* ─── Glass Effect Demo ──────────────────────────────────────── */
+  .glass-demo-wrap {
+    position: relative;
+    height: 120px;
+    border-radius: var(--radius-xl);
+    background: linear-gradient(135deg, #16a34a33, #2563eb33);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .glass-demo-blob {
+    position: absolute;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    filter: blur(30px);
+  }
+
+  .glass-demo-blob:nth-child(1) { background: #22c55e88; top: -20px; left: 20px; }
+  .glass-demo-blob:nth-child(2) { background: #3b82f688; bottom: -20px; right: 20px; }
+
+  .glass-box {
+    position: relative;
+    z-index: 1;
+    backdrop-filter: blur(10px);
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-lg);
+    padding: 12px 20px;
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: white;
+    letter-spacing: 0.06em;
+  }
+
+  /* ─── Code Block ─────────────────────────────────────────────── */
+  .code-block {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--doc-border);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #a5f3a0;
+    overflow-x: auto;
+    margin-bottom: 12px;
+    line-height: 1.7;
+  }
+
+  .code-block .kw   { color: #c792ea; }
+  .code-block .str  { color: #c3e88d; }
+  .code-block .num  { color: #f78c6c; }
+  .code-block .cm   { color: #546e7a; font-style: italic; }
+  .code-block .prop { color: #82aaff; }
+
+  /* ─── Table ──────────────────────────────────────────────────── */
+  .ds-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  .ds-table th {
+    text-align: left;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--doc-muted);
+    border-bottom: 1px solid var(--doc-border);
+  }
+
+  .ds-table td {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--doc-border);
+    color: var(--doc-text);
+    vertical-align: middle;
+  }
+
+  .ds-table tr:last-child td { border-bottom: none; }
+  .ds-table tr:hover td { background: rgba(255,255,255,0.015); }
+
+  .td-mono { font-family: var(--font-mono); font-size: 11px; color: var(--doc-muted); }
+  .td-pill {
+    display: inline-block;
+    background: rgba(34,197,94,0.12);
+    color: var(--green-500);
+    border-radius: var(--radius-full);
+    padding: 1px 8px;
+    font-size: 10px;
+    font-family: var(--font-mono);
+  }
+
+  /* ─── Info Note ──────────────────────────────────────────────── */
+  .note {
+    background: rgba(37,99,235,0.08);
+    border: 1px solid rgba(37,99,235,0.2);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #93c5fd;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .note strong { color: #60a5fa; }
+
+  .warn {
+    background: rgba(220,38,38,0.08);
+    border: 1px solid rgba(220,38,38,0.2);
+    border-radius: var(--radius-lg);
+    padding: 12px 16px;
+    font-size: 12.5px;
+    color: #fca5a5;
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  /* ─── Scrollbar ──────────────────────────────────────────────── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+  /* ─── Utility ────────────────────────────────────────────────── */
+  .mt-4  { margin-top: 16px; }
+  .mt-6  { margin-top: 24px; }
+  .mt-8  { margin-top: 32px; }
+  .mb-2  { margin-bottom: 8px; }
+  .mb-4  { margin-bottom: 16px; }
+  .flex  { display: flex; }
+  .items-center { align-items: center; }
+  .gap-3 { gap: 12px; }
+  .wrap  { flex-wrap: wrap; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ─── SIDEBAR NAV ────────────────────────────────────────── -->
+  <nav class="sidenav">
+    <div class="sidenav-logo">
+      <div class="wordmark">Share AI</div>
+      <div class="tagline">Design System v1.0</div>
+    </div>
+
+    <div class="nav-section-label">Foundation</div>
+    <a href="#colors"     class="nav-link"><span class="nav-dot"></span>Colors</a>
+    <a href="#gradients"  class="nav-link"><span class="nav-dot"></span>Gradients</a>
+    <a href="#typography" class="nav-link"><span class="nav-dot"></span>Typography</a>
+    <a href="#spacing"    class="nav-link"><span class="nav-dot"></span>Spacing</a>
+    <a href="#radius"     class="nav-link"><span class="nav-dot"></span>Border Radius</a>
+    <a href="#shadows"    class="nav-link"><span class="nav-dot"></span>Shadows</a>
+    <a href="#transitions"class="nav-link"><span class="nav-dot"></span>Transitions</a>
+
+    <div class="nav-section-label">Components</div>
+    <a href="#buttons"    class="nav-link"><span class="nav-dot"></span>Buttons</a>
+    <a href="#badges"     class="nav-link"><span class="nav-dot"></span>Badges</a>
+    <a href="#inputs"     class="nav-link"><span class="nav-dot"></span>Inputs</a>
+    <a href="#cards"      class="nav-link"><span class="nav-dot"></span>Cards</a>
+    <a href="#glass"      class="nav-link"><span class="nav-dot"></span>Glass Effect</a>
+
+    <div class="nav-section-label">Patterns</div>
+    <a href="#layout"     class="nav-link"><span class="nav-dot"></span>Layout</a>
+    <a href="#sidebar"    class="nav-link"><span class="nav-dot"></span>Sidebar States</a>
+    <a href="#animations" class="nav-link"><span class="nav-dot"></span>Animations</a>
+    <a href="#libraries"  class="nav-link"><span class="nav-dot"></span>Libraries</a>
+    <a href="#conventions"class="nav-link"><span class="nav-dot"></span>Conventions</a>
+  </nav>
+
+  <!-- ─── MAIN CONTENT ──────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-label">Design System Documentation</div>
+      <h1 class="hero-title">Share AI<br />Frontend Design</h1>
+      <p class="hero-sub">A unified reference for all colors, typography, spacing, components, and repeated patterns used across the Share AI application.</p>
+    </div>
+
+
+    <!-- ─── 1. COLORS ─────────────────────────────────────────── -->
+    <section class="section" id="colors">
+      <div class="section-header">
+        <span class="section-num">01</span>
+        <h2 class="section-title">Colors</h2>
+      </div>
+      <p class="section-desc">The palette is built around Green (brand primary) and Blue (action/CTA), with Red for destructive states and Purple as an accent. All tones follow a numeric scale inherited from Tailwind CSS.</p>
+
+      <div class="sub-title">Green — Brand Primary</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f0fdf4"></div>
+          <div class="swatch-meta"><span class="swatch-name">green-50</span><span class="swatch-hex">#f0fdf4</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#52C41A"></div>
+          <div class="swatch-meta"><span class="swatch-name">green-400</span><span class="swatch-hex">#52C41A</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#22c55e"></div>
+          <div class="swatch-meta"><span class="swatch-name">green-500</span><span class="swatch-hex">#22c55e</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#16a34a"></div>
+          <div class="swatch-meta"><span class="swatch-name">green-600 ★</span><span class="swatch-hex">#16a34a</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#15803d"></div>
+          <div class="swatch-meta"><span class="swatch-name">green-700</span><span class="swatch-hex">#15803d</span></div>
+        </div>
+      </div>
+
+      <div class="sub-title">Blue — Action / CTA</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#dbeafe"></div>
+          <div class="swatch-meta"><span class="swatch-name">blue-100</span><span class="swatch-hex">#dbeafe</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#3b82f6"></div>
+          <div class="swatch-meta"><span class="swatch-name">blue-500</span><span class="swatch-hex">#3b82f6</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#2563eb"></div>
+          <div class="swatch-meta"><span class="swatch-name">blue-600 ★</span><span class="swatch-hex">#2563eb</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#1677FF"></div>
+          <div class="swatch-meta"><span class="swatch-name">ant-blue</span><span class="swatch-hex">#1677FF</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#1d4ed8"></div>
+          <div class="swatch-meta"><span class="swatch-name">blue-700</span><span class="swatch-hex">#1d4ed8</span></div>
+        </div>
+      </div>
+
+      <div class="sub-title">Red — Destructive / Error</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF4D4F"></div>
+          <div class="swatch-meta"><span class="swatch-name">red-ant</span><span class="swatch-hex">#FF4D4F</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#ef4444"></div>
+          <div class="swatch-meta"><span class="swatch-name">red-500</span><span class="swatch-hex">#ef4444</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#dc2626"></div>
+          <div class="swatch-meta"><span class="swatch-name">red-600 ★</span><span class="swatch-hex">#dc2626</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#b91c1c"></div>
+          <div class="swatch-meta"><span class="swatch-name">red-700</span><span class="swatch-hex">#b91c1c</span></div>
+        </div>
+      </div>
+
+      <div class="sub-title">Purple — Accent</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#AB73FC"></div>
+          <div class="swatch-meta"><span class="swatch-name">purple-400</span><span class="swatch-hex">#AB73FC</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#6d28d9"></div>
+          <div class="swatch-meta"><span class="swatch-name">purple-700</span><span class="swatch-hex">#6d28d9</span></div>
+        </div>
+      </div>
+
+      <div class="sub-title">Neutrals</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#f3f4f6"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-100</span><span class="swatch-hex">#f3f4f6</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#e5e7eb"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-200</span><span class="swatch-hex">#e5e7eb</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#9ca3af"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-400</span><span class="swatch-hex">#9ca3af</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#6b7280"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-500</span><span class="swatch-hex">#6b7280</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#4B5563"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-600</span><span class="swatch-hex">#4B5563</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#111827"></div>
+          <div class="swatch-meta"><span class="swatch-name">gray-900</span><span class="swatch-hex">#111827</span></div>
+        </div>
+      </div>
+
+      <div class="sub-title">Social Platform Colors</div>
+      <div class="swatch-group">
+        <div class="swatch">
+          <div class="swatch-color" style="background:#1877F2"></div>
+          <div class="swatch-meta"><span class="swatch-name">Facebook</span><span class="swatch-hex">#1877F2</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#E4405F"></div>
+          <div class="swatch-meta"><span class="swatch-name">Instagram</span><span class="swatch-hex">#E4405F</span></div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background:#FF2442"></div>
+          <div class="swatch-meta"><span class="swatch-name">Xiaohongshu</span><span class="swatch-hex">#FF2442</span></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ─── 2. GRADIENTS ──────────────────────────────────────── -->
+    <section class="section" id="gradients">
+      <div class="section-header">
+        <span class="section-num">02</span>
+        <h2 class="section-title">Gradients</h2>
+      </div>
+      <p class="section-desc">Two gradient directions used across buttons, footers, and accent elements. Always Green → Blue, left to right.</p>
+
+      <div class="gradient-row">
+        <div class="gradient-swatch" style="background: linear-gradient(90deg, #16a34a 0%, #2563eb 100%)">
+          <span class="gradient-label">theme-gradient-button</span>
+        </div>
+        <div class="gradient-swatch" style="background: linear-gradient(to right, #22c55e, #3b82f6)">
+          <span class="gradient-label">gradient-accent</span>
+        </div>
+      </div>
+
+      <div class="code-block">
+<span class="cm">/* Primary gradient — Buttons, footer CTAs */</span>
+.<span class="prop">theme-gradient-button</span> {
+  background: <span class="str">linear-gradient(90deg, #16a34a 0%, #2563eb 100%)</span>;
+}
+
+<span class="cm">/* Accent gradient — Mobile footer, overwrite.css */</span>
+background: <span class="str">linear-gradient(to right, #22c55e, #3b82f6)</span>;</div>
+
+      <div class="note"><strong>Note:</strong> The gradient direction varies slightly between usages (<code>90deg</code> vs <code>to right</code>) but the color stops are consistent. Prefer <code>to right</code> for new code.</div>
+    </section>
+
+
+    <!-- ─── 3. TYPOGRAPHY ────────────────────────────────────── -->
+    <section class="section" id="typography">
+      <div class="section-header">
+        <span class="section-num">03</span>
+        <h2 class="section-title">Typography</h2>
+      </div>
+      <p class="section-desc">The entire app uses <strong>Inter</strong> as its sole typeface. No display or mono fonts are used in the product itself — only in this doc.</p>
+
+      <div class="sub-title">Font Family</div>
+      <div class="code-block">font-family: <span class="str">'Inter'</span>, sans-serif;  <span class="cm">/* global body font */</span></div>
+
+      <div class="sub-title">Type Scale</div>
+
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:24px;font-weight:700;color:#fff;letter-spacing:-0.02em">Page Title</div>
+        <div class="meta">24px / bold<br/>tracking: -0.02em<br/>used: page headings</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:20px;font-weight:600;color:#fff;">Section Heading</div>
+        <div class="meta">20px / semibold<br/>CardTitle class</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:16px;font-weight:500;color:#fff;">Subheading</div>
+        <div class="meta">16px / medium</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:14px;font-weight:400;color:#e8e8f0;">Body text — default paragraph copy used in forms, descriptions, and card content throughout the application.</div>
+        <div class="meta">14px / regular<br/>line-height: 1.5</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:12px;font-weight:400;color:#9ca3af;">Small / Muted — used for labels, captions, and secondary metadata.</div>
+        <div class="meta">12px / regular<br/>color: gray-400</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:11px;font-weight:600;color:#9ca3af;letter-spacing:0.08em;text-transform:uppercase">OVERLINE LABEL</div>
+        <div class="meta">11px / semibold<br/>tracking: 0.08em<br/>uppercase</div>
+      </div>
+      <div class="type-specimen">
+        <div class="preview" style="font-family:'Inter';font-size:10px;font-weight:400;color:#9ca3af;letter-spacing:0.05em;text-transform:uppercase">MICRO LABEL — dividers, input hints</div>
+        <div class="meta">10px / regular<br/>tracking: 0.05em</div>
+      </div>
+    </section>
+
+
+    <!-- ─── 4. SPACING ───────────────────────────────────────── -->
+    <section class="section" id="spacing">
+      <div class="section-header">
+        <span class="section-num">04</span>
+        <h2 class="section-title">Spacing</h2>
+      </div>
+      <p class="section-desc">Follows Tailwind's 4px base unit. Common values used throughout components and layouts.</p>
+
+      <div class="spacing-row">
+        <span class="spacing-label">2 (p-2)</span>
+        <div class="spacing-bar" style="width:8px"></div>
+        <span class="spacing-value">8px</span>
+      </div>
+      <div class="spacing-row">
+        <span class="spacing-label">3 (p-3)</span>
+        <div class="spacing-bar" style="width:12px"></div>
+        <span class="spacing-value">12px — card default padding</span>
+      </div>
+      <div class="spacing-row">
+        <span class="spacing-label">4 (p-4)</span>
+        <div class="spacing-bar" style="width:16px"></div>
+        <span class="spacing-value">16px</span>
+      </div>
+      <div class="spacing-row">
+        <span class="spacing-label">6 (p-6)</span>
+        <div class="spacing-bar" style="width:24px"></div>
+        <span class="spacing-value">24px — header horizontal padding</span>
+      </div>
+      <div class="spacing-row">
+        <span class="spacing-label">8 (p-8)</span>
+        <div class="spacing-bar" style="width:32px"></div>
+        <span class="spacing-value">32px</span>
+      </div>
+      <div class="spacing-row">
+        <span class="spacing-label">space-y-6</span>
+        <div class="spacing-bar" style="width:24px"></div>
+        <span class="spacing-value">24px vertical stack — page sections</span>
+      </div>
+    </section>
+
+
+    <!-- ─── 5. RADIUS ────────────────────────────────────────── -->
+    <section class="section" id="radius">
+      <div class="section-header">
+        <span class="section-num">05</span>
+        <h2 class="section-title">Border Radius</h2>
+      </div>
+
+      <div class="radius-grid">
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:4px"></div>
+          <div class="radius-name">sm<br/>4px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:6px"></div>
+          <div class="radius-name">md<br/>6px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:8px"></div>
+          <div class="radius-name">lg ★<br/>8px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:10px"></div>
+          <div class="radius-name">input (mobile)<br/>10px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:12px"></div>
+          <div class="radius-name">toggle/btn<br/>12px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:16px"></div>
+          <div class="radius-name">mobile card<br/>16px</div>
+        </div>
+        <div class="radius-item">
+          <div class="radius-box" style="border-radius:9999px; width:80px; height:32px"></div>
+          <div class="radius-name">full<br/>badge/pill</div>
+        </div>
+      </div>
+
+      <div class="note mt-4"><strong>Default</strong>: <code>--radius: 0.5rem</code> (8px) via Tailwind config. Images use <code>border-radius: 8px</code> explicitly. Mobile cards use 16px.</div>
+    </section>
+
+
+    <!-- ─── 6. SHADOWS ──────────────────────────────────────── -->
+    <section class="section" id="shadows">
+      <div class="section-header">
+        <span class="section-num">06</span>
+        <h2 class="section-title">Shadows</h2>
+      </div>
+
+      <div class="shadow-grid">
+        <div class="shadow-item" style="box-shadow: 0 1px 2px rgba(0,0,0,0.05)">
+          <div class="shadow-name">shadow-sm<br/><span style="opacity:0.5;font-size:10px">0 1px 2px rgba(0,0,0,0.05)</span></div>
+        </div>
+        <div class="shadow-item" style="box-shadow: 0 1px 3px rgba(0,0,0,0.08)">
+          <div class="shadow-name">card-md<br/><span style="opacity:0.5;font-size:10px">0 1px 3px rgba(0,0,0,0.08)</span></div>
+        </div>
+        <div class="shadow-item" style="box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)">
+          <div class="shadow-name">shadow-lg<br/><span style="opacity:0.5;font-size:10px">double-layer depth</span></div>
+        </div>
+        <div class="shadow-item" style="box-shadow: 0 12px 24px rgba(0,0,0,0.25)">
+          <div class="shadow-name">card-hover<br/><span style="opacity:0.5;font-size:10px">on translateY(-4px)</span></div>
+        </div>
+        <div class="shadow-item" style="box-shadow: 0 -6px 12px rgba(0,0,0,0.08)">
+          <div class="shadow-name">shadow-hover<br/><span style="opacity:0.5;font-size:10px">upward glow</span></div>
+        </div>
+        <div class="shadow-item" style="box-shadow: 0 0 0 3px rgba(34,197,94,0.2)">
+          <div class="shadow-name">focus-ring<br/><span style="opacity:0.5;font-size:10px">input focus state</span></div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ─── 7. TRANSITIONS ───────────────────────────────────── -->
+    <section class="section" id="transitions">
+      <div class="section-header">
+        <span class="section-num">07</span>
+        <h2 class="section-title">Transitions</h2>
+      </div>
+
+      <table class="ds-table">
+        <thead>
+          <tr>
+            <th>Token</th>
+            <th>Value</th>
+            <th>Use Case</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="td-mono">transition-fast</span></td>
+            <td><span class="td-mono">0.2s ease</span></td>
+            <td>Colors, borders, backgrounds</td>
+          </tr>
+          <tr>
+            <td><span class="td-mono">transition-base</span></td>
+            <td><span class="td-mono">0.3s ease</span></td>
+            <td>Card hover, opacity, card-hover class</td>
+          </tr>
+          <tr>
+            <td><span class="td-mono">transition-slow</span></td>
+            <td><span class="td-mono">0.5s cubic-bezier(0.4,0,0.2,1)</span></td>
+            <td>Sidebar submenu expansion (Framer Motion)</td>
+          </tr>
+          <tr>
+            <td><span class="td-mono">sidebar-collapse</span></td>
+            <td><span class="td-mono">duration-300</span></td>
+            <td>Sidebar open/close via Tailwind</td>
+          </tr>
+          <tr>
+            <td><span class="td-mono">slider-handle</span></td>
+            <td><span class="td-mono">0.5s cubic-bezier</span></td>
+            <td>Custom slider thumb</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+
+    <!-- ─── 8. BUTTONS ───────────────────────────────────────── -->
+    <section class="section" id="buttons">
+      <div class="section-header">
+        <span class="section-num">08</span>
+        <h2 class="section-title">Buttons</h2>
+      </div>
+      <p class="section-desc">Buttons exist in two layers: Shadcn <code>button.jsx</code> (CVA-based primitives) and custom CSS classes in <code>globals.css</code>. Ant Design also provides its own buttons with overrides in <code>overwrite.css</code>.</p>
+
+      <div class="sub-title">Variants</div>
+      <div class="btn-grid">
+        <button class="ds-btn ds-btn-gradient ds-btn-md">Gradient (Primary)</button>
+        <button class="ds-btn ds-btn-green ds-btn-md">Green</button>
+        <button class="ds-btn ds-btn-blue ds-btn-md">Blue</button>
+        <button class="ds-btn ds-btn-red ds-btn-md">Danger / Red</button>
+        <button class="ds-btn ds-btn-purple ds-btn-md">Purple</button>
+        <button class="ds-btn ds-btn-black ds-btn-md">Black</button>
+        <button class="ds-btn ds-btn-outline ds-btn-md">Outline</button>
+        <button class="ds-btn ds-btn-ghost ds-btn-md">Ghost</button>
+      </div>
+
+      <div class="sub-title">Sizes</div>
+      <div class="btn-grid flex items-center">
+        <button class="ds-btn ds-btn-gradient ds-btn-sm">Small — h32</button>
+        <button class="ds-btn ds-btn-gradient ds-btn-md">Default — h36</button>
+        <button class="ds-btn ds-btn-gradient ds-btn-lg">Large — h44</button>
+      </div>
+
+      <div class="sub-title">CVA Variants (button.jsx)</div>
+      <div class="code-block">
+<span class="cm">// variant options from button.jsx</span>
+<span class="kw">const</span> <span class="prop">buttonVariants</span> = cva({
+  variants: {
+    variant: {
+      default:     <span class="str">"bg-primary text-primary-foreground hover:bg-primary/90"</span>,
+      destructive: <span class="str">"bg-destructive text-destructive-foreground"</span>,
+      outline:     <span class="str">"border border-input bg-background hover:bg-accent"</span>,
+      secondary:   <span class="str">"bg-secondary text-secondary-foreground"</span>,
+      ghost:       <span class="str">"hover:bg-accent hover:text-accent-foreground"</span>,
+      link:        <span class="str">"text-primary underline-offset-4 hover:underline"</span>,
+      white:       <span class="str">"bg-[rgba(255,255,255,0.8)] text-black"</span>,
+      green:       <span class="str">"bg-[#52C41A] text-white hover:bg-green-600"</span>,
+    },
+    size: {
+      default: <span class="str">"h-8 px-3 text-xs"</span>,
+      sm:      <span class="str">"h-8 px-3 text-xs"</span>,
+      lg:      <span class="str">"h-11 px-3 text-sm"</span>,
+      icon:    <span class="str">"h-8 w-8 px-3 text-xs"</span>,
+    },
+  },
+})
+      </div>
+
+      <div class="sub-title">Ant Design Button Overrides (overwrite.css)</div>
+      <div class="code-block">
+.ant-btn { padding: <span class="num">0 20px</span>; height: <span class="num">32px</span>; font-size: <span class="num">12px</span>; }
+.ant-btn-lg { height: <span class="num">44px</span>; font-size: <span class="num">14px</span>; }
+      </div>
+    </section>
+
+
+    <!-- ─── 9. BADGES ────────────────────────────────────────── -->
+    <section class="section" id="badges">
+      <div class="section-header">
+        <span class="section-num">09</span>
+        <h2 class="section-title">Badges</h2>
+      </div>
+      <p class="section-desc">Used for status labels, role tags, and content lifecycle indicators. Always <code>rounded-full</code>, <code>text-xs</code>, <code>font-semibold</code>.</p>
+
+      <div class="badge-row">
+        <span class="ds-badge ds-badge-primary">Active</span>
+        <span class="ds-badge ds-badge-blue">Processing</span>
+        <span class="ds-badge ds-badge-red">Failed</span>
+        <span class="ds-badge ds-badge-purple">Premium</span>
+        <span class="ds-badge ds-badge-gray">Draft</span>
+        <span class="ds-badge ds-badge-outline">Outline</span>
+      </div>
+
+      <div class="code-block">
+<span class="cm">// badge.jsx base class</span>
+<span class="str">"inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors"</span>
+      </div>
+    </section>
+
+
+    <!-- ─── 10. INPUTS ───────────────────────────────────────── -->
+    <section class="section" id="inputs">
+      <div class="section-header">
+        <span class="section-num">10</span>
+        <h2 class="section-title">Inputs</h2>
+      </div>
+      <p class="section-desc">Form inputs use Shadcn's <code>input.jsx</code> base and Ant Design's form components. Border: <code>214.3 31.8% 91.4%</code>. Focus ring: green-500 with opacity 15% glow.</p>
+
+      <input class="ds-input" placeholder="Text input — default state" />
+      <input class="ds-input" placeholder="Another input field" style="border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15);" />
+
+      <div class="code-block">
+<span class="cm">// input.jsx</span>
+<span class="str">"flex h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm
+ shadow-sm transition-colors file:border-0 file:bg-transparent
+ focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring
+ disabled:cursor-not-allowed disabled:opacity-50"</span>
+      </div>
+
+      <div class="note"><strong>Mobile inputs</strong> (inside <code>.assistant-mobile-*</code>): <code>border-radius: 10px</code>, height 44px, slightly larger target.</div>
+    </section>
+
+
+    <!-- ─── 11. CARDS ───────────────────────────────────────── -->
+    <section class="section" id="cards">
+      <div class="section-header">
+        <span class="section-num">11</span>
+        <h2 class="section-title">Cards</h2>
+      </div>
+      <p class="section-desc">Cards are the primary container pattern. The <code>.card-hover</code> class adds a 4px lift + deeper shadow on hover. All cards are <code>rounded-lg</code> (8px), <code>border</code>, <code>shadow-sm</code>.</p>
+
+      <div class="card-grid">
+        <div class="ds-card">
+          <div class="ds-card-title">Card Title</div>
+          <div class="ds-card-desc">This is the standard card pattern used across page listing views. Hover to see the elevation effect.</div>
+        </div>
+        <div class="ds-card">
+          <div class="ds-card-title">Processing Mode</div>
+          <div class="ds-card-desc">Used for selection cards (ProcessingModeCard). Same structure with an active state border.</div>
+        </div>
+      </div>
+
+      <div class="code-block">
+<span class="cm">// card.jsx structure</span>
+Card:        <span class="str">"rounded-lg border bg-card text-card-foreground shadow-sm"</span>
+CardHeader:  <span class="str">"flex flex-col space-y-1.5 px-2 p-3"</span>
+CardContent: <span class="str">"p-3"</span>
+CardFooter:  <span class="str">"flex items-center p-6 pb-3"</span>
+
+<span class="cm">// globals.css hover effect</span>
+.<span class="prop">card-hover</span>:hover {
+  transform: <span class="str">translateY(-4px)</span>;
+  transition: <span class="str">0.3s ease</span>;
+}
+      </div>
+    </section>
+
+
+    <!-- ─── 12. GLASS EFFECT ─────────────────────────────────── -->
+    <section class="section" id="glass">
+      <div class="section-header">
+        <span class="section-num">12</span>
+        <h2 class="section-title">Glass Effect</h2>
+      </div>
+      <p class="section-desc">The <code>.glass-effect</code> utility is applied to overlays, modals, and floating panels that sit above gradient backgrounds.</p>
+
+      <div class="glass-demo-wrap">
+        <div class="glass-demo-blob"></div>
+        <div class="glass-demo-blob"></div>
+        <div class="glass-box">.glass-effect</div>
+      </div>
+
+      <div class="code-block mt-4">
+.<span class="prop">glass-effect</span> {
+  backdrop-filter: <span class="str">blur(10px)</span>;
+  background: <span class="str">rgba(255, 255, 255, 0.1)</span>;
+  border: <span class="str">1px solid rgba(255, 255, 255, 0.2)</span>;
+}
+      </div>
+    </section>
+
+
+    <!-- ─── 13. LAYOUT ───────────────────────────────────────── -->
+    <section class="section" id="layout">
+      <div class="section-header">
+        <span class="section-num">13</span>
+        <h2 class="section-title">Layout</h2>
+      </div>
+      <p class="section-desc">Most pages are wrapped in the shared <code>Layout</code> component (sidebar + header). Two routes bypass it: <code>/login</code> and <code>/shareSection</code>.</p>
+
+      <div class="sub-title">Structure</div>
+      <div class="code-block">
+<span class="cm">// Layout structure</span>
+&lt;<span class="prop">div</span> className=<span class="str">"flex h-screen overflow-hidden"</span>&gt;
+  &lt;<span class="prop">Sidebar</span> /&gt;                    <span class="cm">// w-64 (300px), bg-white shadow-lg</span>
+  &lt;<span class="prop">div</span> className=<span class="str">"flex-1 flex flex-col overflow-hidden"</span>&gt;
+    &lt;<span class="prop">Header</span> /&gt;                  <span class="cm">// bg-white shadow-sm border-b border-gray-200 px-6 py-4</span>
+    &lt;<span class="prop">main</span> className=<span class="str">"flex-1 overflow-y-auto p-6"</span>&gt;
+      {children}
+    &lt;/<span class="prop">main</span>&gt;
+  &lt;/<span class="prop">div</span>&gt;
+&lt;/<span class="prop">div</span>&gt;
+      </div>
+
+      <table class="ds-table mt-6">
+        <thead>
+          <tr><th>Element</th><th>Key Classes</th><th>Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sidebar</td>
+            <td class="td-mono">bg-white shadow-lg w-64</td>
+            <td>Collapsible, smooth duration-300</td>
+          </tr>
+          <tr>
+            <td>Header</td>
+            <td class="td-mono">bg-white shadow-sm border-b border-gray-200 px-6 py-4</td>
+            <td>Profile dropdown, business name, logout</td>
+          </tr>
+          <tr>
+            <td>Page body</td>
+            <td class="td-mono">flex-1 overflow-y-auto p-6</td>
+            <td>Scrollable content area</td>
+          </tr>
+          <tr>
+            <td>Max width (container)</td>
+            <td class="td-mono">max-w-[1400px] mx-auto px-8</td>
+            <td>Tailwind container config at 2xl</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+
+    <!-- ─── 14. SIDEBAR STATES ───────────────────────────────── -->
+    <section class="section" id="sidebar">
+      <div class="section-header">
+        <span class="section-num">14</span>
+        <h2 class="section-title">Sidebar States</h2>
+      </div>
+      <p class="section-desc">Nav items have three states — default, hover, and active. Active uses a green left border + light green tint background.</p>
+
+      <div class="sidebar-demo">
+        <div class="sidebar-demo-item">
+          <div class="sidebar-demo-icon"></div>
+          Dashboard
+        </div>
+        <div class="sidebar-demo-item active">
+          <div class="sidebar-demo-icon"></div>
+          Content
+        </div>
+        <div class="sidebar-demo-item">
+          <div class="sidebar-demo-icon"></div>
+          Image Pool
+        </div>
+        <div class="sidebar-demo-item">
+          <div class="sidebar-demo-icon"></div>
+          Templates
+        </div>
+        <div class="sidebar-demo-item">
+          <div class="sidebar-demo-icon"></div>
+          Settings
+        </div>
+      </div>
+
+      <div class="code-block mt-4">
+<span class="cm">/* Default */</span>
+color: <span class="num">#4B5563</span>; hover:color: <span class="num">#111827</span>; hover:bg: <span class="str">gray-50</span>;
+
+<span class="cm">/* Active */</span>
+color: <span class="num">#16a34a</span>;
+background: <span class="str">rgba(240, 253, 244, 1)</span>;  <span class="cm">/* green-50 */</span>
+border-left: <span class="str">2px solid #16a34a</span>;
+font-weight: <span class="num">500</span>;
+      </div>
+    </section>
+
+
+    <!-- ─── 15. ANIMATIONS ───────────────────────────────────── -->
+    <section class="section" id="animations">
+      <div class="section-header">
+        <span class="section-num">15</span>
+        <h2 class="section-title">Animations</h2>
+      </div>
+      <p class="section-desc">Custom keyframe animations defined in <code>globals.css</code>, supplemented by Framer Motion for submenu expansions.</p>
+
+      <div class="anim-grid">
+        <div class="anim-demo">
+          <div class="anim-box anim-fade-in"></div>
+          fade-in
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">0.3s ease, translateY(10px)</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-box anim-float"></div>
+          animate-float
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">6s ease-in-out ±20px</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-box anim-flash"></div>
+          flash-active
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">2s highlight flash</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-box anim-slide"></div>
+          slide-in
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">0.4s from left</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-box anim-pulse"></div>
+          pulse
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">1.5s opacity loop</div>
+        </div>
+        <div class="anim-demo">
+          <div class="anim-box anim-spin"></div>
+          spin
+          <div style="font-size:9px;margin-top:4px;color:#546e7a">1s linear loader</div>
+        </div>
+      </div>
+
+      <div class="code-block mt-4">
+<span class="cm">/* globals.css — keyframes */</span>
+@keyframes <span class="prop">fadeIn</span>      { from { opacity:0; transform:translateY(10px) } to { opacity:1; transform:none } }
+@keyframes <span class="prop">float</span>       { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-20px) } }
+@keyframes <span class="prop">hlFlash</span>     { 0%{ background:linear-gradient(...) } 100%{ background:transparent } }
+@keyframes <span class="prop">accordionDown</span> { from{ height:0 } to{ height:var(--radix-accordion-content-height) } }
+@keyframes <span class="prop">accordionUp</span>   { from{ height:var(--radix-accordion-content-height) } to{ height:0 } }
+      </div>
+    </section>
+
+
+    <!-- ─── 16. LIBRARIES ────────────────────────────────────── -->
+    <section class="section" id="libraries">
+      <div class="section-header">
+        <span class="section-num">16</span>
+        <h2 class="section-title">Libraries &amp; Stack</h2>
+      </div>
+
+      <table class="ds-table">
+        <thead>
+          <tr><th>Library</th><th>Version / Notes</th><th>Used For</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Tailwind CSS</td>
+            <td><span class="td-pill">core</span></td>
+            <td>Utility classes, spacing, colors, responsive</td>
+          </tr>
+          <tr>
+            <td>Ant Design</td>
+            <td><span class="td-pill">v5</span></td>
+            <td>Tables, Modals, Drawers, Forms, message toasts</td>
+          </tr>
+          <tr>
+            <td>Radix UI</td>
+            <td><span class="td-pill">shadcn</span></td>
+            <td>Dialog, Tabs, Select, Switch, DropdownMenu, AlertDialog</td>
+          </tr>
+          <tr>
+            <td>CVA</td>
+            <td><span class="td-pill">class-variance-authority</span></td>
+            <td>Button, Badge, Input variant management</td>
+          </tr>
+          <tr>
+            <td>Lucide React</td>
+            <td><span class="td-pill">icons</span></td>
+            <td>All iconography</td>
+          </tr>
+          <tr>
+            <td>Framer Motion</td>
+            <td><span class="td-pill">animation</span></td>
+            <td>Sidebar submenu expand/collapse, transitions</td>
+          </tr>
+          <tr>
+            <td>Recharts</td>
+            <td><span class="td-pill">charts</span></td>
+            <td>LineChart, BarChart, PieChart on analytics pages</td>
+          </tr>
+          <tr>
+            <td>clsx + tailwind-merge</td>
+            <td><span class="td-pill">utils</span></td>
+            <td><code>cn()</code> utility — all component composition</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warn mt-4"><strong>Layering rule:</strong> Radix/Shadcn for interactive primitives that need accessibility. Ant Design for complex data-heavy components (tables, drawers, forms). Never mix both for the same component type.</div>
+    </section>
+
+
+    <!-- ─── 17. CONVENTIONS ──────────────────────────────────── -->
+    <section class="section" id="conventions">
+      <div class="section-header">
+        <span class="section-num">17</span>
+        <h2 class="section-title">Conventions &amp; Rules</h2>
+      </div>
+
+      <div class="sub-title">Repeated Patterns to Follow</div>
+      <table class="ds-table">
+        <thead>
+          <tr><th>Pattern</th><th>Rule</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Image thumbnails</td>
+            <td>Height 144px, <code>object-fit: cover</code>, <code>border-radius: 8px</code>, hover blur with Ant Design PreviewGroup</td>
+          </tr>
+          <tr>
+            <td>Table pages</td>
+            <td>Ant Design Table + FilterDrawerV2 + FilterTags + ExportModal + pagination</td>
+          </tr>
+          <tr>
+            <td>Date display</td>
+            <td>Always format as <code>DD MMM YYYY</code> (e.g. 11 May 2026)</td>
+          </tr>
+          <tr>
+            <td>Toast notifications</td>
+            <td>Ant Design <code>message.*</code> for in-app toasts; Shadcn <code>toast</code> for persistent</td>
+          </tr>
+          <tr>
+            <td>Gradient buttons</td>
+            <td>Use <code>.theme-gradient-button</code> class for all primary CTAs</td>
+          </tr>
+          <tr>
+            <td>Destructive actions</td>
+            <td>Always <code>red-600 (#dc2626)</code>, never red-500 alone, confirm dialog required</td>
+          </tr>
+          <tr>
+            <td>Active nav state</td>
+            <td><code>text-green-600 bg-green-50 border-r-2 border-green-600</code></td>
+          </tr>
+          <tr>
+            <td>Page section gap</td>
+            <td><code>space-y-6</code> (24px) for stacked sections</td>
+          </tr>
+          <tr>
+            <td>Credit balance refresh</td>
+            <td>Use <code>useRefreshCreditBalance()</code> — never write to store directly</td>
+          </tr>
+          <tr>
+            <td>Role checks</td>
+            <td>Always via <code>user?.user?.role</code> from Redux, not localStorage directly</td>
+          </tr>
+          <tr>
+            <td>Number decimals</td>
+            <td>Use <code>numberDecimal = 2</code> from <code>startUp.js</code> — never hardcode</td>
+          </tr>
+          <tr>
+            <td>Timezone</td>
+            <td><code>"Asia/Kuala_Lumpur"</code> from <code>startUp.js</code> — never hardcode</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="sub-title">Class Utility Pattern</div>
+      <div class="code-block">
+<span class="cm">// Always compose classes with cn() from /lib/utils</span>
+<span class="kw">import</span> { <span class="prop">cn</span> } <span class="kw">from</span> <span class="str">"@/lib/utils"</span>
+
+&lt;<span class="prop">div</span> className={cn(
+  <span class="str">"base-classes"</span>,
+  isActive && <span class="str">"active-classes"</span>,
+  className       <span class="cm">// always forward className prop</span>
+)} /&gt;
+      </div>
+
+      <div class="sub-title">Drawer Pattern (Ant Design)</div>
+      <div class="code-block">
+<span class="cm">// Standard drawer padding variants</span>
+.ant-drawer-body               { padding: <span class="num">12px</span>; }    <span class="cm">/* default */</span>
+.ant-drawer-body.no-padding    { padding: <span class="num">0</span>; }      <span class="cm">/* image/media drawers */</span>
+      </div>
+
+      <div class="sub-title">Mobile-specific class prefix</div>
+      <div class="code-block">
+<span class="cm">/* All mobile form overrides are namespaced under .assistant-mobile-* */</span>
+.<span class="prop">assistant-mobile-card</span>    { border-radius: <span class="num">16px</span>; box-shadow: <span class="num">0 1px 3px rgba(0,0,0,0.08)</span>; }
+.<span class="prop">assistant-mobile-input</span>   { border-radius: <span class="num">10px</span>; height: <span class="num">44px</span>; }
+.<span class="prop">assistant-mobile-footer</span>  { position: <span class="str">fixed</span>; bottom: <span class="num">0</span>; background: gradient; }
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

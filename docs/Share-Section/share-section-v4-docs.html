@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShareAi — Share Section System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Assistant:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* ==============================
+   VARIABLES
+   ============================== */
+        :root {
+            --primary: #16a34a;
+            --primary-hover: #15803d;
+            --primary-light: #f0fdf4;
+            --primary-lighter: #dcfce7;
+            --blue: #2563eb;
+            --blue-hover: #1d4ed8;
+            --gradient-primary: linear-gradient(90deg, #16a34a 0%, #2563eb 100%);
+            --gradient-primary-hover: linear-gradient(90deg, #15803d 0%, #1d4ed8 100%);
+            --bg: #F6F6F7;
+            --card: #FFFFFF;
+            --text: #4B5563;
+            --text-muted: #A6A8A8;
+            --border: #E5E7EB;
+            --dark: #0f172a;
+
+            --grad-a: #15803d;
+            --grad-b: #06b6d4;
+            --grad-c: #1e40af;
+
+            --ff-head: 'Syne', sans-serif;
+            --ff-body: 'Assistant', Arial, sans-serif;
+            --ff-code: 'Fira Code', monospace;
+
+            --r-sm: 4px;
+            --r-md: 8px;
+            --r-lg: 12px;
+            --r-xl: 20px;
+            --r-full: 9999px;
+            --sh-sm: 0 1px 2px rgba(0, 0, 0, .05);
+            --sh-md: 0 4px 12px rgba(0, 0, 0, .08);
+            --sh-lg: 0 10px 24px rgba(0, 0, 0, .1);
+            --sh-brand: 0 8px 32px rgba(37, 99, 235, .18);
+        }
+
+        /* ==============================
+   RESET
+   ============================== */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--ff-body);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 16px;
+            line-height: 1.5;
+            cursor: none;
+            overflow-x: hidden;
+        }
+
+        code {
+            font-family: var(--ff-code);
+            font-size: .85em;
+            color: var(--primary);
+        }
+
+        a,
+        button,
+        [role=button] {
+            cursor: none;
+        }
+
+        /* ==============================
+   CUSTOM CURSOR
+   ============================== */
+        #cur-dot {
+            position: fixed;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--grad-a), var(--grad-b), var(--grad-c));
+            pointer-events: none;
+            z-index: 99999;
+            transform: translate(-50%, -50%);
+            transition: width .18s, height .18s, opacity .18s;
+            will-change: left, top;
+        }
+
+        #cur-ring {
+            position: fixed;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(37, 99, 235, .34);
+            pointer-events: none;
+            z-index: 99998;
+            transform: translate(-50%, -50%);
+            transition: width .2s, height .2s, border-color .2s;
+            will-change: left, top;
+        }
+
+        .cur-big #cur-dot {
+            width: 18px;
+            height: 18px;
+        }
+
+        .cur-big #cur-ring {
+            width: 46px;
+            height: 46px;
+            border-color: rgba(22, 163, 74, .48);
+        }
+
+        /* ==============================
+   GUIDE CURSOR ANIMATION
+   ============================== */
+        @keyframes guide-hover {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-9px);
+            }
+        }
+
+        @keyframes guide-fly {
+            from {
+                transform: translate(-60px, 30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bubble-pop {
+            from {
+                transform: translateX(-50%) scale(.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(-50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .guide-wrap {
+            position: absolute;
+            pointer-events: none;
+            z-index: 50;
+            animation: guide-fly .6s cubic-bezier(.25, 1, .5, 1) both;
+        }
+
+        .guide-inner {
+            animation: guide-hover 2s ease-in-out infinite;
+        }
+
+        .guide-bubble {
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: #fff;
+            padding: 5px 14px;
+            border-radius: 10px;
+            font-family: var(--ff-head);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            white-space: nowrap;
+            border: 2px solid #1e293b;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, .3);
+            animation: bubble-pop .4s cubic-bezier(.25, 1, .5, 1) .45s both;
+        }
+
+        .guide-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 9px;
+            height: 9px;
+            background: var(--dark);
+            border-right: 2px solid #1e293b;
+            border-bottom: 2px solid #1e293b;
+            margin-top: -5px;
+        }
+
+        .guide-svg {
+            width: 38px;
+            height: 38px;
+            filter: drop-shadow(0 3px 10px rgba(30, 64, 175, .38));
+        }
+
+        /* ==============================
+   NAV
+   ============================== */
+        .nav {
+            position: sticky;
+            top: 0;
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-icon {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-name {
+            font-family: var(--ff-head);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .nav-pill {
+            font-family: var(--ff-code);
+            font-size: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 2px 9px;
+            border-radius: var(--r-full);
+        }
+
+        .lang-sw {
+            position: relative;
+            width: 92px;
+            height: 30px;
+            background: rgba(148, 163, 184, .18);
+            border-radius: var(--r-full);
+            padding: 3px;
+            display: flex;
+            align-items: center;
+        }
+
+        .lang-sw-thumb {
+            position: absolute;
+            left: 3px;
+            top: 3px;
+            width: 43px;
+            height: 24px;
+            background: #fff;
+            border-radius: var(--r-full);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+            transition: transform .5s cubic-bezier(.16, 1, .3, 1);
+        }
+
+        .lang-sw.cn .lang-sw-thumb {
+            transform: translateX(43px);
+        }
+
+        .lang-sw-lbs {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        .lang-sw-lb {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            transition: color .3s;
+        }
+
+        .lang-sw-lb.on {
+            color: var(--dark);
+        }
+
+        .lang-sw-lb.off {
+            color: #94a3b8;
+        }
+
+        /* ==============================
+   LAYOUT
+   ============================== */
+        .wrap {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .sec {
+            padding: 68px 0;
+        }
+
+        .sec+.sec {
+            border-top: 1px solid var(--border);
+        }
+
+        .sec-label {
+            font-family: var(--ff-code);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            margin-bottom: 8px;
+        }
+
+        .sec-title {
+            font-family: var(--ff-head);
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 10px;
+            line-height: 1.15;
+        }
+
+        .sec-desc {
+            font-size: 15px;
+            color: var(--text-muted);
+            max-width: 560px;
+            line-height: 1.7;
+        }
+
+        .sec-hd {
+            margin-bottom: 40px;
+        }
+
+        /* ==============================
+   HERO
+   ============================== */
+        .hero {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 56px 0 44px;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .hero-eyebrow {
+            font-family: var(--ff-code);
+            font-size: 12px;
+            color: var(--primary);
+            font-weight: 500;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .hero-h {
+            font-family: var(--ff-head);
+            font-size: 44px;
+            font-weight: 800;
+            color: var(--dark);
+            line-height: 1.05;
+            margin-bottom: 14px;
+        }
+
+        .hero-h span {
+            color: var(--primary);
+        }
+
+        .hero-p {
+            font-size: 16px;
+            color: var(--text);
+            line-height: 1.7;
+            max-width: 500px;
+            margin-bottom: 28px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 28px;
+        }
+
+        .stat-n {
+            font-family: var(--ff-head);
+            font-size: 30px;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .stat-l {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+            font-weight: 500;
+        }
+
+        .hero-code {
+            background: var(--dark);
+            border-radius: var(--r-lg);
+            padding: 20px 22px;
+            min-width: 260px;
+        }
+
+        .cl {
+            font-family: var(--ff-code);
+            font-size: 12.5px;
+            line-height: 1.9;
+        }
+
+        .cm {
+            color: #64748b;
+        }
+
+        .kw {
+            color: #f472b6;
+        }
+
+        .st {
+            color: #a3e635;
+        }
+
+        .pr {
+            color: #93c5fd;
+        }
+
+        .vl {
+            color: #fb923c;
+        }
+
+        /* ==============================
+   LANDING DEMO
+   ============================== */
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            align-items: start;
+        }
+
+        .phone {
+            background: var(--bg);
+            border-radius: 22px;
+            border: 1.5px solid var(--border);
+            overflow: hidden;
+            box-shadow: var(--sh-lg);
+        }
+
+        .phone-hd {
+            background: #fff;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 14px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .phone-logo {
+            width: 22px;
+            height: 22px;
+            background: var(--primary);
+            border-radius: 6px;
+        }
+
+        .phone-body {
+            padding: 28px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            position: relative;
+        }
+
+        .share-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            padding: 22px 18px;
+            text-align: center;
+            width: 100%;
+            box-shadow: var(--sh-md);
+        }
+
+        .sc-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--primary-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+            color: var(--primary);
+        }
+
+        .sc-title {
+            font-family: var(--ff-head);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .sc-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .sc-btn {
+            width: 100%;
+            background: var(--gradient-primary);
+            color: #fff;
+            border: none;
+            border-radius: 13px;
+            padding: 13px 14px;
+            font-family: var(--ff-body);
+            font-size: 14px;
+            font-weight: 600;
+            transition: background .2s;
+            position: relative;
+        }
+
+        .sc-btn:hover {
+            background: var(--gradient-primary-hover);
+        }
+
+        .guide-anchor {
+            position: absolute;
+            bottom: 54px;
+            right: 64px;
+            pointer-events: none;
+        }
+
+        .ann-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .ann {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 14px 16px;
+        }
+
+        .ann-t {
+            font-family: var(--ff-head);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+
+        .ann-d {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .ann-code {
+            font-family: var(--ff-code);
+            font-size: 10.5px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 7px 11px;
+            margin-top: 9px;
+            color: #475569;
+            white-space: pre;
+            overflow-x: auto;
+        }
+
+        /* ==============================
+   STEPPER
+   ============================== */
+        .stepper {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--sh-md);
+        }
+
+        .step-dots {
+            display: flex;
+            align-items: center;
+            padding: 18px 22px;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            gap: 0;
+        }
+
+        .sdot {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            flex-shrink: 0;
+        }
+
+        .sdot-circle {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--ff-head);
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            transition: all .3s;
+            flex-shrink: 0;
+        }
+
+        .sdot.active .sdot-circle {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+        }
+
+        .sdot.done .sdot-circle {
+            background: #dcfce7;
+            border-color: #86efac;
+            color: #16a34a;
+        }
+
+        .sdot-lbl {
+            font-family: var(--ff-head);
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            white-space: nowrap;
+        }
+
+        .sdot.active .sdot-lbl {
+            color: var(--primary);
+        }
+
+        .sdot.done .sdot-lbl {
+            color: #16a34a;
+        }
+
+        .sconn {
+            flex: 1;
+            height: 1px;
+            min-width: 12px;
+            background: var(--border);
+            margin: 0 6px;
+        }
+
+        .step-body {
+            padding: 28px 26px;
+            min-height: 260px;
+            display: none;
+        }
+
+        .step-body.active {
+            display: block;
+        }
+
+        .step-title {
+            font-family: var(--ff-head);
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .step-desc {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 18px;
+        }
+
+        .step-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 26px;
+            border-top: 1px solid var(--border);
+            background: var(--bg);
+        }
+
+        .sbtn {
+            padding: 9px 18px;
+            border-radius: 10px;
+            font-family: var(--ff-body);
+            font-size: 13.5px;
+            font-weight: 600;
+            border: none;
+            transition: all .2s;
+        }
+
+        .sbtn-prev {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .sbtn-prev:hover {
+            background: var(--bg);
+        }
+
+        .sbtn-next {
+            background: var(--gradient-primary);
+            color: #fff;
+        }
+
+        .sbtn-next:hover {
+            background: var(--gradient-primary-hover);
+        }
+
+        .sbtn:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+        }
+
+        .plat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+            gap: 9px;
+        }
+
+        .plat {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 11px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            background: #fff;
+            transition: all .2s;
+        }
+
+        .plat:hover,
+        .plat.sel {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .plat-ic {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .plat-nm {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .lng-opts {
+            display: flex;
+            gap: 9px;
+        }
+
+        .lng-opt {
+            padding: 9px 22px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: var(--ff-head);
+            font-size: 14px;
+            font-weight: 600;
+            background: #fff;
+            color: var(--text);
+            transition: all .2s;
+        }
+
+        .lng-opt:hover,
+        .lng-opt.sel {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .cat-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+        }
+
+        .cat {
+            padding: 7px 14px;
+            border: 2px solid transparent;
+            border-radius: var(--r-full);
+            font-size: 12.5px;
+            font-weight: 600;
+            background: linear-gradient(#fff, #fff) padding-box, linear-gradient(var(--border), var(--border)) border-box;
+            color: var(--dark);
+            transition: all .2s;
+        }
+
+        .cat:hover {
+            background: linear-gradient(#fff, #fff) padding-box, var(--gradient-primary) border-box;
+            color: var(--dark);
+        }
+
+        .cat.sel {
+            background: var(--gradient-primary);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 8px 18px rgba(37, 99, 235, .18);
+        }
+
+        .img-row {
+            display: flex;
+            gap: 9px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .img-th {
+            width: 76px;
+            height: 76px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: var(--primary-lighter);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all .2s;
+        }
+
+        .img-th.sel {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .img-acts {
+            display: flex;
+            gap: 9px;
+        }
+
+        .img-act {
+            flex: 1;
+            padding: 9px;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all .2s;
+        }
+
+        .img-act:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .txt-area {
+            width: 100%;
+            min-height: 110px;
+            padding: 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-family: var(--ff-body);
+            font-size: 13.5px;
+            color: var(--text);
+            resize: vertical;
+            outline: none;
+            transition: border-color .2s;
+            margin-bottom: 10px;
+        }
+
+        .txt-area:focus {
+            border-color: var(--primary);
+        }
+
+        .shuffle {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 7px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            background: #fff;
+            font-size: 12.5px;
+            font-weight: 600;
+            transition: all .2s;
+        }
+
+        .shuffle:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .pub-preview {
+            background: var(--bg);
+            border-radius: 13px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .pub-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 3px 11px;
+            border-radius: var(--r-full);
+            font-size: 11.5px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .pub-text {
+            font-size: 13.5px;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .pub-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-family: var(--ff-body);
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: background .2s;
+        }
+
+        .pub-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* ==============================
+   API DIAGRAM
+   ============================== */
+        .api-phases {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .api-phase {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 22px;
+        }
+
+        .phase-lbl {
+            text-align: right;
+            padding-top: 13px;
+        }
+
+        .phase-name {
+            font-family: var(--ff-code);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+        }
+
+        .phase-when {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+
+        .api-group {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        .api-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            overflow: hidden;
+            transition: box-shadow .2s, transform .2s;
+        }
+
+        .api-card:hover {
+            box-shadow: var(--sh-brand);
+            transform: translateY(-1px);
+        }
+
+        .api-hd {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 13px 17px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .method {
+            font-family: var(--ff-code);
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 3px;
+            letter-spacing: .04em;
+        }
+
+        .get {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .post {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .endpoint {
+            font-family: var(--ff-code);
+            font-size: 12.5px;
+            color: var(--dark);
+            font-weight: 500;
+        }
+
+        .api-bd {
+            padding: 13px 17px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .api-sub {
+            font-family: var(--ff-code);
+            font-size: 9.5px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: 6px;
+        }
+
+        .api-box {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 9px 11px;
+        }
+
+        .prow {
+            font-family: var(--ff-code);
+            font-size: 10.5px;
+            line-height: 1.75;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2px;
+        }
+
+        .pk {
+            color: #7c3aed;
+        }
+
+        .pt {
+            color: #64748b;
+            font-size: 9.5px;
+        }
+
+        .ps {
+            color: #cbd5e1;
+        }
+
+        .pd {
+            color: var(--text);
+            font-family: var(--ff-body);
+            font-size: 10.5px;
+        }
+
+        .rk {
+            color: #0284c7;
+            font-family: var(--ff-code);
+            font-size: 10.5px;
+        }
+
+        .note {
+            font-size: 10.5px;
+            color: #64748b;
+            line-height: 1.5;
+            font-family: var(--ff-body);
+        }
+
+        /* ==============================
+   LOGIC TREE
+   ============================== */
+        .logic-box {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 22px 26px;
+            overflow-x: auto;
+        }
+
+        .logic-pre {
+            font-family: var(--ff-code);
+            font-size: 12.5px;
+            line-height: 1.9;
+            color: var(--text);
+            white-space: pre;
+        }
+
+        .chip {
+            display: inline;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-size: 11.5px;
+            font-weight: 600;
+            font-family: var(--ff-code);
+        }
+
+        .c-ok {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .c-fb {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .c-tx {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .c-rd {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .c-gr {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .c-pu {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .chips-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            margin-bottom: 22px;
+        }
+
+        /* ==============================
+   MODALS SECTION
+   ============================== */
+        .modal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 14px;
+        }
+
+        .modal-card {
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: var(--r-lg);
+            padding: 16px;
+        }
+
+        .modal-card-name {
+            font-family: var(--ff-head);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .modal-card-type {
+            font-family: var(--ff-code);
+            font-size: 10px;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 2px 8px;
+            border-radius: var(--r-full);
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .modal-card-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* ==============================
+   REVEAL
+   ============================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            transition: opacity .5s ease, transform .5s ease;
+        }
+
+        .reveal.vis {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ==============================
+   FOOTER
+   ============================== */
+        .footer {
+            background: var(--dark);
+            color: #64748b;
+            text-align: center;
+            padding: 28px 24px;
+            font-size: 12.5px;
+        }
+
+        .footer strong {
+            color: var(--primary);
+        }
+
+        /* ==============================
+   RESPONSIVE
+   ============================== */
+        @media(max-width:768px) {
+
+            .hero-grid,
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-code {
+                display: none;
+            }
+
+            .api-bd {
+                grid-template-columns: 1fr;
+            }
+
+            .api-phase {
+                grid-template-columns: 1fr;
+            }
+
+            .phase-lbl {
+                text-align: left;
+                padding-top: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Custom cursor -->
+    <div id="cur-dot"></div>
+    <div id="cur-ring"></div>
+
+    <!-- Nav -->
+    <nav class="nav">
+        <div class="nav-left">
+            <div class="nav-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"
+                    stroke-linecap="round">
+                    <circle cx="18" cy="5" r="3" />
+                    <circle cx="6" cy="12" r="3" />
+                    <circle cx="18" cy="19" r="3" />
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+            </div>
+            <span class="nav-name">ShareAi</span>
+            <span class="nav-pill">shareSection.js</span>
+        </div>
+        <div class="lang-sw" id="langSw" onclick="toggleLang()">
+            <div class="lang-sw-thumb"></div>
+            <div class="lang-sw-lbs">
+                <span class="lang-sw-lb on" id="lbEN">EN</span>
+                <span class="lang-sw-lb off" id="lbCN">中</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="hero">
+        <div class="wrap">
+            <div class="hero-grid">
+                <div>
+                    <p class="hero-eyebrow">// System Documentation</p>
+                    <h1 class="hero-h">Share<span>Section</span><br>System</h1>
+                    <p class="hero-p">A multi-step guided share flow. A user scans a QR code with their
+                        <code>userId</code>, picks
+                        a platform, language, category, and content — then shares via native share or URL, with full
+                        image
+                        preparation and fallback handling.
+                    </p>
+                    <div class="stats">
+                        <div>
+                            <div class="stat-n">6</div>
+                            <div class="stat-l">API Calls</div>
+                        </div>
+                        <div>
+                            <div class="stat-n">6</div>
+                            <div class="stat-l">Flow Steps</div>
+                        </div>
+                        <div>
+                            <div class="stat-n">5</div>
+                            <div class="stat-l">Modals</div>
+                        </div>
+                        <div>
+                            <div class="stat-n">6</div>
+                            <div class="stat-l">Share Results</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-code">
+                    <div class="cl"><span class="cm">// Entry point</span></div>
+                    <div class="cl"><span class="kw">import</span> <span class="pr">ShareSectionMainPageV4</span></div>
+                    <div class="cl">&nbsp;&nbsp;<span class="kw">from</span> <span
+                            class="st">'@/components/shareContent/page/ShareSectionMainPageV4'</span></div>
+                    <br>
+                    <div class="cl"><span class="cm">// Route: /shareSection</span></div>
+                    <div class="cl"><span class="cm">// Query: ?userId=:id</span></div>
+                    <br>
+                    <div class="cl"><span class="pr">userId</span> <span class="cm">→ phase 1 APIs</span></div>
+                    <div class="cl"><span class="pr">categoryId</span> <span class="cm">→ product list APIs</span></div>
+                    <div class="cl"><span class="vl">share()</span> <span class="cm">→ POST log</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================
+     SECTION 1 — LANDING UI
+     ============================= -->
+    <div class="sec reveal" id="s1">
+        <div class="wrap">
+            <div class="sec-hd">
+                <p class="sec-label">01 — Landing State</p>
+                <h2 class="sec-title">The Landing UI</h2>
+                <p class="sec-desc">When the page loads with a valid <code>?userId=</code> param, a centered card is
+                    shown. A
+                    <strong>ReferenceGuideOverlay</strong> cursor animation floats above the CTA button, guiding the
+                    user in.
+                </p>
+            </div>
+            <div class="demo-grid">
+                <!-- Phone mockup -->
+                <div class="phone">
+                    <div class="phone-hd">
+                        <div class="phone-logo"></div>
+                        <div class="lang-sw" style="width:86px;height:28px;" onclick="toggleLang()">
+                            <div class="lang-sw-thumb" style="width:40px;height:22px;top:3px;left:3px;"></div>
+                            <div class="lang-sw-lbs" style="font-size:11px;">
+                                <span class="lang-sw-lb on" id="phEN">EN</span>
+                                <span class="lang-sw-lb off" id="phCN">中</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="phone-body">
+                        <div class="share-card">
+                            <div class="sc-icon">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round">
+                                    <circle cx="18" cy="5" r="3" />
+                                    <circle cx="6" cy="12" r="3" />
+                                    <circle cx="18" cy="19" r="3" />
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                                </svg>
+                            </div>
+                            <div class="sc-title">Achievement Unlocked!</div>
+                            <div class="sc-desc">Share your progress and inspire others on their journey.</div>
+                            <button class="sc-btn" id="btn-start">Share Your Progress</button>
+                        </div>
+                        <!-- Guide cursor -->
+                        <div class="guide-anchor">
+                            <div class="guide-wrap">
+                                <div class="guide-inner">
+                                    <div class="guide-bubble">START HERE!</div>
+                                    <svg class="guide-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <defs>
+                                            <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#15803d" />
+                                                <stop offset="50%" stop-color="#06b6d4" />
+                                                <stop offset="100%" stop-color="#1e40af" />
+                                            </linearGradient>
+                                        </defs>
+                                        <!-- MousePointer2 icon path -->
+                                        <path
+                                            d="M4.037 4.688a.495.495 0 0 1 .651-.651l16 6.5a.5.5 0 0 1-.063.947l-6.124 1.58a2 2 0 0 0-1.438 1.435l-1.579 6.126a.5.5 0 0 1-.947.063z"
+                                            fill="url(#ggrad)" stroke="white" stroke-width="0.8" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Annotations -->
+                <div class="ann-list">
+                    <div class="ann">
+                        <div class="ann-t">ReferenceGuideOverlay</div>
+                        <div class="ann-d">Floating animated cursor targeting <code>#btn-start</code>. Uses
+                            <code>getBoundingClientRect()</code> + <code>requestAnimationFrame</code> for 400ms to track
+                            position.
+                            Auto-picks bubble direction (top/left/right/bottom) to avoid overlapping interactive
+                            elements.
+                        </div>
+                        <div class="ann-code">@keyframes guide-hover {
+                            0%,100% { transform: translateY(0); }
+                            50% { transform: translateY(-8px); }
+                            }
+                            gradient: #15803d → #06b6d4 → #1e40af
+                            transition: cubic-bezier(0.25, 1, 0.5, 1) 600ms</div>
+                    </div>
+                    <div class="ann">
+                        <div class="ann-t">Language Toggle (Header)</div>
+                        <div class="ann-d">Sticky top bar. Switches EN ↔ 中. Calls <code>changeLanguage(localeKey)</code>
+                            or falls
+                            back to <code>window.location.reload()</code>. Persists to
+                            <code>localStorage["locale"]</code>.
+                        </div>
+                        <div class="ann-code">spring: cubic-bezier(0.16, 1, 0.3, 1) 500ms
+                            storage key: "locale"
+                            values: "en" | "cn"</div>
+                    </div>
+                    <div class="ann">
+                        <div class="ann-t">Loading State Flags</div>
+                        <div class="ann-d">Five independent flags prevent UI over-blocking:</div>
+                        <div class="ann-code">pageLoading → full-page Spin overlay
+                            modalLoading → inside guided modal only
+                            categoryLoading → category selector
+                            shareInProgress → disables all share actions
+                            waitingForApp → overlay while app opens</div>
+                    </div>
+                    <div class="ann">
+                        <div class="ann-t">Auto-open Guided Flow</div>
+                        <div class="ann-d">Once platforms load and nothing is loading, <code>openGuidedFlow()</code>
+                            fires
+                            automatically. A <code>useRef</code> guard (<code>hasAutoOpenedGuidedFlowRef</code>) ensures
+                            it only fires
+                            once per session.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================
+     SECTION 2 — GUIDED FLOW
+     ============================= -->
+    <div class="sec reveal" id="s2">
+        <div class="wrap">
+            <div class="sec-hd">
+                <p class="sec-label">02 — Guided Flow Modal</p>
+                <h2 class="sec-title">6-Step Share Wizard</h2>
+                <p class="sec-desc">The <code>guidedShareFlow</code> modal. Steps are computed dynamically — the
+                    <strong>Image</strong> step only appears on iOS / HarmonyOS / MagicOS <em>or</em> for the Google
+                    Review
+                    platform.
+                </p>
+            </div>
+
+            <div class="stepper">
+                <div class="step-dots" id="stepDots"></div>
+
+                <!-- Step 0: Platform -->
+                <div class="step-body active" data-s="0">
+                    <div class="step-title">Select Platform</div>
+                    <div class="step-desc">Active platforms fetched via <code>getUserPlatforms</code>. Google Review is
+                        pinned
+                        first; Others is pinned last. Fields stored:
+                        <code>platformId, title, name, url, type, icon</code>.
+                    </div>
+                    <div class="plat-grid">
+                        <div class="plat sel" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#e8f5e9">⭐</div>
+                            <div class="plat-nm">Google Review</div>
+                        </div>
+                        <div class="plat" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#e8f5e9">💬</div>
+                            <div class="plat-nm">WhatsApp</div>
+                        </div>
+                        <div class="plat" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#e3f2fd">🔵</div>
+                            <div class="plat-nm">Facebook</div>
+                        </div>
+                        <div class="plat" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#fce4ec">📸</div>
+                            <div class="plat-nm">Instagram</div>
+                        </div>
+                        <div class="plat" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#f3e5f5">🎵</div>
+                            <div class="plat-nm">TikTok</div>
+                        </div>
+                        <div class="plat" onclick="pickPlat(this)">
+                            <div class="plat-ic" style="background:#f5f5f5">•••</div>
+                            <div class="plat-nm">Others</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:14px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+                        type: <span style="color:var(--primary)">'OTHER'</span> | <span
+                            style="color:var(--primary)">'URL'</span> — determines
+                        share strategy</p>
+                </div>
+
+                <!-- Step 1: Language -->
+                <div class="step-body" data-s="1">
+                    <div class="step-title">Select Language</div>
+                    <div class="step-desc">Languages fetched from <code>getLanguages</code>. Only languages available
+                        for the
+                        user's content are shown. Changing language refetches categories + content.</div>
+                    <div class="lng-opts">
+                        <button class="lng-opt sel" onclick="pickLng(this)">English</button>
+                        <button class="lng-opt" onclick="pickLng(this)">中文</button>
+                        <button class="lng-opt" onclick="pickLng(this)">Melayu</button>
+                    </div>
+                    <p style="margin-top:16px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">on
+                        change →
+                        <span style="color:var(--primary)">fetchCategories(lang)</span> + <span
+                            style="color:var(--primary)">fetchContent(lang, firstCatId)</span>
+                    </p>
+                </div>
+
+                <!-- Step 2: Category -->
+                <div class="step-body" data-s="2">
+                    <div class="step-title">Select Category</div>
+                    <div class="step-desc">Categories from <code>getCategoryList</code>. Selecting a category calls
+                        <code>getProductListByCategory</code>, auto-selects the first product, then calls
+                        <code>getRandomBusinessContent</code>. Empty categories, products, or content →
+                        <code>contentNotFound</code> modal.
+                    </div>
+                    <div class="cat-wrap">
+                        <button class="cat sel" onclick="pickCat(this)">Health &amp; Wellness</button>
+                        <button class="cat" onclick="pickCat(this)">Beauty</button>
+                        <button class="cat" onclick="pickCat(this)">Nutrition</button>
+                        <button class="cat" onclick="pickCat(this)">Fitness</button>
+                        <button class="cat" onclick="pickCat(this)">Supplements</button>
+                        <button class="cat" onclick="pickCat(this)">Skincare</button>
+                    </div>
+                    <p style="margin-top:14px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+                        getCategoryList: <span style="color:var(--primary)">{ outletUserId, language, isShared:0,
+                            status:'ACTIVE' }</span><br>
+                        getProductListByCategory: <span style="color:var(--primary)">{ categoryId, outletUserId,
+                            language, isShared:0, status:'ACTIVE' }</span></p>
+                </div>
+
+                <!-- Step 3: Image -->
+                <div class="step-body" data-s="3">
+                    <div class="step-title">Save Image <span
+                            style="font-size:11px;font-family:var(--ff-code);color:var(--text-muted);font-weight:400;">(conditional
+                            step)</span></div>
+                    <div class="step-desc">Only shown on <strong>iOS / HarmonyOS / MagicOS</strong> or <strong>Google
+                            Review</strong> platform. Images are pre-fetched via <code>/api/proxy-image</code> and
+                        cached as
+                        <code>File</code> objects before sharing.
+                    </div>
+                    <div class="img-row">
+                        <div class="img-th sel">🌿</div>
+                        <div class="img-th">✨</div>
+                        <div class="img-th">💚</div>
+                        <div class="img-th">🌟</div>
+                    </div>
+                    <div class="img-acts">
+                        <button class="img-act">💾 Save Current</button>
+                        <button class="img-act">💾 Save All</button>
+                    </div>
+                    <p style="margin-top:12px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+                        proxy: <span style="color:var(--primary)">/api/proxy-image?url=…</span> → Blob → <span
+                            style="color:var(--primary)">File[]</span> cached in <span
+                            style="color:var(--primary)">preparedImageFiles</span></p>
+                </div>
+
+                <!-- Step 4: Content -->
+                <div class="step-body" data-s="4">
+                    <div class="step-title">Edit Message</div>
+                    <div class="step-desc">Share text built by <code>buildShareDescription(content)</code>: title +
+                        contentText +
+                        location + hashtags. User can edit or shuffle for a new random piece from the same category.
+                    </div>
+                    <textarea class="txt-area">TITLE: Discover the Power of Natural Health
+CONTENT: Unlock your wellness potential with our premium supplements, crafted from nature's finest ingredients.
+LOCATION: Kuala Lumpur
+HASHTAG: #health #wellness #natural</textarea>
+                    <button class="shuffle">🔀 Shuffle Content</button>
+                    <p style="margin-top:10px;font-family:var(--ff-code);font-size:10.5px;color:var(--text-muted);">
+                        state: <span style="color:var(--primary)">shareText</span> | parsed by <span
+                            style="color:var(--primary)">parseShareFields()</span></p>
+                </div>
+
+                <!-- Step 5: Publish -->
+                <div class="step-body" data-s="5">
+                    <div class="step-title">Publish</div>
+                    <div class="step-desc">Final preview. Triggers <code>handlePlatformLogic()</code> which routes to
+                        <code>executeShare()</code> or opens a URL. After success → <code>waitForAppOpen(10000ms)</code>
+                        → success
+                        or connection-issue modal.
+                    </div>
+                    <div class="pub-preview">
+                        <div class="pub-badge">⭐ Google Review</div>
+                        <div class="pub-text">TITLE: Discover the Power of Natural Health
+                            CONTENT: Unlock your wellness potential...
+                            LOCATION: Kuala Lumpur
+                            HASHTAG: #health #wellness #natural</div>
+                    </div>
+                    <button class="pub-btn">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round">
+                            <circle cx="18" cy="5" r="3" />
+                            <circle cx="6" cy="12" r="3" />
+                            <circle cx="18" cy="19" r="3" />
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                        </svg>
+                        Publish &amp; Share
+                    </button>
+                </div>
+
+                <div class="step-foot">
+                    <button class="sbtn sbtn-prev" id="prevBtn" onclick="prevStep()" disabled>← Back</button>
+                    <span id="stepLbl" style="font-family:var(--ff-code);font-size:11.5px;color:var(--text-muted);">Step
+                        1 of
+                        6</span>
+                    <button class="sbtn sbtn-next" id="nextBtn" onclick="nextStep()">Next →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================
+     SECTION 3 — API CALLS
+     ============================= -->
+    <div class="sec reveal" id="s3">
+        <div class="wrap">
+            <div class="sec-hd">
+                <p class="sec-label">03 — API Calls</p>
+                <h2 class="sec-title">API Sequence &amp; Return Data</h2>
+                <p class="sec-desc">All calls are triggered by the <code>?userId=</code> URL param. Three phases run in
+                    dependency order. The final POST logs the share after success.</p>
+            </div>
+
+            <div class="api-phases">
+
+                <!-- Phase 1 -->
+                <div class="api-phase">
+                    <div class="phase-lbl">
+                        <div class="phase-name">Phase 1</div>
+                        <div class="phase-when">userId resolved<br>from router.query</div>
+                    </div>
+                    <div class="api-group">
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/packages/getUserPackage</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">userId</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">from URL ?userId=</span></div>
+                                        <div class="prow"><span class="pk">packageStatus</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">'ACTIVE'</span></div>
+                                        <div class="prow"><span class="pk">limit</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">10</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">data[0]._id</span></div>
+                                        <div class="note" style="margin-top:4px;">Saved as <code>queryPackageId</code>.
+                                            Unlocks Phase 2
+                                            fetches once resolved.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/platforms/getUserPlatforms</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">userId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">limit</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">100</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns — userPlatforms[]</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">.platformId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="rk">.title</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;</span><span
+                                                class="pd" style="font-size:9.5px;">("WhatsApp")</span></div>
+                                        <div class="prow"><span class="rk">.url</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;</span><span
+                                                class="pd" style="font-size:9.5px;">(URL platforms)</span></div>
+                                        <div class="prow"><span class="rk">.status</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;</span><span
+                                                class="pd" style="font-size:9.5px;">(filtered: ACTIVE)</span>
+                                        </div>
+                                        <div class="prow"><span class="rk">.type</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;</span><span
+                                                class="pd" style="font-size:9.5px;">'OTHER' | 'URL'</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Phase 2 -->
+                <div class="api-phase">
+                    <div class="phase-lbl">
+                        <div class="phase-name">Phase 2</div>
+                        <div class="phase-when">userId + language<br>available</div>
+                    </div>
+                    <div class="api-group">
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/content/getLanguages</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">userId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">limit</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">10</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">data.languagesAvailable</span></div>
+                                        <div class="prow" style="color:#16a34a;font-size:10.5px;">
+                                            ['english','chinese','malay']</div>
+                                        <div class="note" style="margin-top:4px;">Empty → defaults to all 3 options +
+                                            shows
+                                            <code>contentNotFound</code>.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/content/getCategoryList</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">outletUserId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">language</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">"english"</span></div>
+                                        <div class="prow"><span class="pk">status</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">'ACTIVE'</span></div>
+                                        <div class="prow"><span class="pk">isShared</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">0</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns — data[]</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">.productId</span><span class="pd"
+                                                style="font-size:9.5px;">&nbsp;← used as categoryId</span></div>
+                                        <div class="prow"><span class="rk">.productName</span><span class="pd"
+                                                style="font-size:9.5px;">&nbsp;← button label</span></div>
+                                        <div class="note" style="margin-top:4px;">Empty array →
+                                            <code>contentNotFound</code> modal shown.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/content/getProductListByCategory</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">categoryId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">outletUserId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">language</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">status</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">'ACTIVE'</span></div>
+                                        <div class="prow"><span class="pk">isShared</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">0</span></div>
+                                        <div class="prow"><span class="pk">sort</span><span
+                                                class="pt">&nbsp;json</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">{ createdAt: 1 }</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns — data[]</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">.productId</span><span class="pd"
+                                                style="font-size:9.5px;">&nbsp;← selectedProductId</span></div>
+                                        <div class="prow"><span class="rk">.officialProductName</span></div>
+                                        <div class="note" style="margin-top:4px;">First product is auto-selected, then
+                                            content is fetched for that product.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method get">GET</span>
+                                <span class="endpoint">/content/getRandomBusinessContent</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Query Params</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">userId</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">language</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="pk">productId</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">selectedProductId</span></div>
+                                        <div class="prow"><span class="pk">limit</span><span
+                                                class="pt">&nbsp;number</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">1</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Returns — data.content</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="rk">._id</span><span class="pd"
+                                                style="font-size:9.5px;">&nbsp;←
+                                                contentId for POST</span></div>
+                                        <div class="prow"><span class="rk">.title</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="rk">.contentText</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                        <div class="prow"><span class="rk">.imageUrls</span><span
+                                                class="pt">&nbsp;string[]</span></div>
+                                        <div class="prow"><span class="rk">.hashtags</span><span
+                                                class="pt">&nbsp;string[]</span></div>
+                                        <div class="prow"><span class="rk">.location</span><span
+                                                class="pt">&nbsp;string</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Phase 3 -->
+                <div class="api-phase">
+                    <div class="phase-lbl">
+                        <div class="phase-name">Phase 3</div>
+                        <div class="phase-when">After successful<br>share only</div>
+                    </div>
+                    <div class="api-group">
+                        <div class="api-card">
+                            <div class="api-hd">
+                                <span class="method post">POST</span>
+                                <span class="endpoint">/content/shareContent</span>
+                            </div>
+                            <div class="api-bd">
+                                <div>
+                                    <div class="api-sub">Request Body</div>
+                                    <div class="api-box">
+                                        <div class="prow"><span class="pk">contentId</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">selectedRecord._id</span></div>
+                                        <div class="prow"><span class="pk">platform</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">platform.title</span></div>
+                                        <div class="prow"><span class="pk">platformId</span><span
+                                                class="pt">&nbsp;string</span><span class="ps">&nbsp;—&nbsp;</span><span
+                                                class="pd">platform.platformId</span></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="api-sub">Purpose</div>
+                                    <div class="api-box">
+                                        <div class="note">Logs the share event server-side. Called in
+                                            <code>logShareAction()</code> only
+                                            when <code>status === 'shared'</code>. Errors are swallowed — non-blocking
+                                            fire-and-forget.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================
+     SECTION 4 — SHARE LOGIC
+     ============================= -->
+    <div class="sec reveal" id="s4">
+        <div class="wrap">
+            <div class="sec-hd">
+                <p class="sec-label">04 — Share Logic</p>
+                <h2 class="sec-title">executeShare Decision Tree</h2>
+                <p class="sec-desc">Platform type routing, Web Share API detection, image file prep, and fallback
+                    handling — all
+                    returning a typed result status.</p>
+            </div>
+
+            <div class="chips-legend">
+                <span class="chip c-ok">shared</span>
+                <span class="chip c-fb">fallback_download</span>
+                <span class="chip c-tx">text_only_fallback</span>
+                <span class="chip c-pu">images_not_ready</span>
+                <span class="chip c-gr">cancelled</span>
+                <span class="chip c-rd">failed</span>
+            </div>
+
+            <div class="logic-box">
+                <pre class="logic-pre"><span style="color:#7c3aed;font-weight:700">handlePlatformShare</span>(<span style="color:#0284c7">platformType</span>, <span style="color:#0284c7">platformTitle</span>, <span style="color:#0284c7">text</span>, <span style="color:#0284c7">imageUrls</span>, <span style="color:#0284c7">platformUrl</span>)
+│
+├─ <span style="color:#92400e">isFilesOnlySharePlatform(platformTitle)?</span>   <span style="color:#94a3b8">// rednote | tiktok | lemon | yelp</span>
+│  └─ YES → executeShare(filesOnly, includeText=false, skipCopy=autoCopyText)
+│
+├─ <span style="color:#92400e">platformType === 'OTHER'?</span>
+│  └─ YES → executeShare(text + images via native share)
+│
+├─ <span style="color:#92400e">platformType === 'URL'?</span>
+│  └─ YES → copyText() → window.open(platformUrl) → <span class="chip c-ok">{ status:'shared', mode:'url' }</span>
+│
+└─ (no match) → <span class="chip c-rd">{ status:'failed', reason:'unsupported_platform_type' }</span>
+
+
+<span style="color:#7c3aed;font-weight:700">executeShare</span>(<span style="color:#0284c7">text</span>, <span style="color:#0284c7">imageUrls</span>, <span style="color:#0284c7">skipCopy</span>, <span style="color:#0284c7">preparedImageFiles</span>, ...)
+│
+├─ <span style="color:#92400e">!skipCopy?</span>  → navigator.clipboard.writeText(text)
+│
+├─ <span style="color:#92400e">hasImages && cachedFiles.length === 0?</span>   <span style="color:#94a3b8">// proxy-image fetch still in-flight</span>
+│  └─ YES → <span class="chip c-pu">{ status:'images_not_ready' }</span>
+│
+├─ <span style="color:#92400e">!navigator.share?</span>   <span style="color:#94a3b8">// Web Share API not available</span>
+│  ├─ hasImages → /api/download-image fallback → <span class="chip c-fb">{ status:'fallback_download' }</span>
+│  └─ !hasImages → <span class="chip c-tx">{ status:'text_only_fallback' }</span>
+│
+├─ <span style="color:#92400e">canShareFiles && cachedFiles.length > 0?</span>   <span style="color:#94a3b8">// navigator.canShare({ files })</span>
+│  └─ navigator.share({ files, text? })
+│     ├─ success  → <span class="chip c-ok">{ status:'shared', mode:'files' }</span>
+│     ├─ AbortError → <span class="chip c-gr">{ status:'cancelled' }</span>
+│     └─ other error → <span class="chip c-rd">{ status:'failed' }</span>
+│
+├─ <span style="color:#92400e">hasImages && !canShareFiles?</span>
+│  ├─ !allowTextOnlyNativeShare → download fallback → <span class="chip c-fb">{ status:'fallback_download' }</span>
+│  └─ allowTextOnly → fall through to text share ↓
+│
+└─ navigator.share({ text })
+   ├─ success  → <span class="chip c-ok">{ status:'shared', mode:'text' }</span>
+   ├─ AbortError → <span class="chip c-gr">{ status:'cancelled' }</span>
+   └─ other error → <span class="chip c-rd">{ status:'failed' }</span>
+
+
+<span style="color:#94a3b8">// Post-share: if status==='shared' AND platform !== OTHERS AND mode !== 'url'</span>
+<span style="color:#7c3aed;font-weight:700">waitForAppOpen</span>(10 000ms)
+  <span style="color:#94a3b8">// 500ms settle delay to avoid false-positive blur from share sheet closing</span>
+  <span style="color:#94a3b8">// Listens for: window 'blur' OR document 'visibilitychange' (hidden)</span>
+  ├─ app opened  → successfulShare modal → POST /content/shareContent
+  └─ timeout     → connectionIssue modal
+
+
+<span style="color:#94a3b8">// Image preparation (background, runs on content load)</span>
+<span style="color:#7c3aed;font-weight:700">prepareImagesForSharing</span>(imageUrls)
+  <span style="color:#94a3b8">// For each URL: GET /api/proxy-image?url=… → Blob → new File(blob, name, {type})</span>
+  <span style="color:#94a3b8">// Results stored at matching index in preparedImageFiles[]</span>
+  <span style="color:#94a3b8">// index 0 is set immediately when first image resolves (progressive)</span>
+
+<span style="color:#94a3b8">// AUTO_COPY_TEXT_OS = ['ios', 'harmonyos', 'magicos']</span>
+<span style="color:#94a3b8">// FILES_ONLY_PLATFORMS = ['rednote', 'tiktok', 'lemon', 'yelp']</span>
+<span style="color:#94a3b8">// On files-only + AUTO_COPY_TEXT_OS: text is auto-copied before images are shared</span>
+</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================
+     SECTION 5 — MODALS
+     ============================= -->
+    <div class="sec reveal" id="s5">
+        <div class="wrap">
+            <div class="sec-hd">
+                <p class="sec-label">05 — Modal States</p>
+                <h2 class="sec-title">5 Modal Types</h2>
+                <p class="sec-desc">All powered by <code>SinglePopUpModal</code> with a <code>type</code> prop. Each has
+                    its own
+                    open/close state and callback chain.</p>
+            </div>
+            <div class="modal-grid">
+                <div class="modal-card">
+                    <div class="modal-card-name">guidedShareFlow</div>
+                    <div class="modal-card-type">6-step wizard</div>
+                    <div class="modal-card-desc">Main share flow modal. <code>closeable=false</code>. Driven by
+                        <code>guidedStepIndex</code> and <code>guidedSteps[]</code> array. Auto-opens once platforms
+                        load.
+                    </div>
+                </div>
+                <div class="modal-card">
+                    <div class="modal-card-name">guidedReplayFinal</div>
+                    <div class="modal-card-type">replay flow</div>
+                    <div class="modal-card-desc">Shown after first successful share. Lets user share again without
+                        re-selecting
+                        platform. <code>closeable=false</code> → close ends session.</div>
+                </div>
+                <div class="modal-card">
+                    <div class="modal-card-name">successfulShare</div>
+                    <div class="modal-card-type">success</div>
+                    <div class="modal-card-desc">Two actions: End session (redirect to itscreative.biz/ishare) or
+                        continue to
+                        replay flow. Hidden while <code>waitingForApp</code> is true.</div>
+                </div>
+                <div class="modal-card">
+                    <div class="modal-card-name">contentNotFound</div>
+                    <div class="modal-card-type">guard</div>
+                    <div class="modal-card-desc">Shown when language/category/content is unavailable.
+                        <code>closeable=false</code>. Only action is to end the session.
+                    </div>
+                </div>
+                <div class="modal-card">
+                    <div class="modal-card-name">connectionIssue</div>
+                    <div class="modal-card-type">error</div>
+                    <div class="modal-card-desc">Shown when <code>waitForAppOpen</code> times out (10s) without
+                        detecting a
+                        blur/hidden event. User can dismiss and retry.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <strong>ShareAi</strong> — Share Section System &nbsp;·&nbsp;
+        <code
+            style="font-size:11px;color:#475569;">src/pages/shareSection.js → ShareSectionMainPageV4.jsx → shareFlow.js</code>
+    </footer>
+
+    <script>
+        // ===========================
+        // Custom cursor
+        // ===========================
+        const dot = document.getElementById('cur-dot');
+        const ring = document.getElementById('cur-ring');
+        let mx = 0, my = 0, rx = 0, ry = 0;
+
+        document.addEventListener('mousemove', e => {
+            mx = e.clientX; my = e.clientY;
+            dot.style.left = mx + 'px';
+            dot.style.top = my + 'px';
+        });
+
+        (function animRing() {
+            rx += (mx - rx) * 0.14;
+            ry += (my - ry) * 0.14;
+            ring.style.left = rx + 'px';
+            ring.style.top = ry + 'px';
+            requestAnimationFrame(animRing);
+        })();
+
+        // Enlarge on interactives
+        document.querySelectorAll('button, .plat, .lng-opt, .cat, .img-th, .api-card, .lang-sw, .ann').forEach(el => {
+            el.addEventListener('mouseenter', () => document.body.classList.add('cur-big'));
+            el.addEventListener('mouseleave', () => document.body.classList.remove('cur-big'));
+        });
+
+        // ===========================
+        // Language toggle
+        // ===========================
+        let cn = false;
+        function toggleLang() {
+            cn = !cn;
+            document.querySelectorAll('.lang-sw').forEach(el => el.classList.toggle('cn', cn));
+            ['lbEN', 'lbCN', 'phEN', 'phCN'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const isCN = id.includes('CN');
+                el.className = 'lang-sw-lb ' + (cn === isCN ? 'on' : 'off');
+            });
+        }
+
+        // ===========================
+        // Stepper
+        // ===========================
+        const STEPS = ['Platform', 'Language', 'Category', 'Image', 'Content', 'Publish'];
+        let cur = 0;
+
+        function buildDots() {
+            const c = document.getElementById('stepDots');
+            c.innerHTML = '';
+            STEPS.forEach((s, i) => {
+                const d = document.createElement('div');
+                d.className = 'sdot' + (i === cur ? ' active' : i < cur ? ' done' : '');
+                d.innerHTML = `<div class="sdot-circle">${i < cur ? '✓' : i + 1}</div><span class="sdot-lbl">${s}</span>`;
+                if (i < cur) d.onclick = () => jump(i);
+                c.appendChild(d);
+                if (i < STEPS.length - 1) {
+                    const conn = document.createElement('div');
+                    conn.className = 'sconn';
+                    c.appendChild(conn);
+                }
+            });
+        }
+
+        function show(i) {
+            document.querySelectorAll('.step-body').forEach((el, j) => el.classList.toggle('active', j === i));
+            document.getElementById('stepLbl').textContent = `Step ${i + 1} of ${STEPS.length}`;
+            document.getElementById('prevBtn').disabled = i === 0;
+            const nb = document.getElementById('nextBtn');
+            nb.textContent = i === STEPS.length - 1 ? '✓ Done' : 'Next →';
+            nb.disabled = false;
+            buildDots();
+        }
+
+        function nextStep() { if (cur < STEPS.length - 1) { cur++; show(cur); } }
+        function prevStep() { if (cur > 0) { cur--; show(cur); } }
+        function jump(i) { cur = i; show(cur); }
+        function pickPlat(el) { document.querySelectorAll('.plat').forEach(p => p.classList.remove('sel')); el.classList.add('sel'); }
+        function pickLng(el) { document.querySelectorAll('.lng-opt').forEach(l => l.classList.remove('sel')); el.classList.add('sel'); }
+        function pickCat(el) { document.querySelectorAll('.cat').forEach(c => c.classList.remove('sel')); el.classList.add('sel'); }
+
+        buildDots(); show(0);
+
+        // ===========================
+        // Scroll reveal
+        // ===========================
+        const obs = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+    </script>
+</body>
+
+</html>
