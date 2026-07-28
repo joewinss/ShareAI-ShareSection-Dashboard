@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Spin } from "antd";
 import { useRouter } from "next/router";
+import { Store, Gift, ShieldCheck, HelpCircle, Info, Calendar, Award, CheckCircle2, ChevronRight, ChevronDown, Trophy, Zap, Sparkles } from "lucide-react";
 import useIsCollapsed from "@/components/useIsCollapsed";
 import MerchantDrawWheel from "../components/MerchantDrawWheel";
 import GiftIcon from "../components/GiftIcon";
@@ -8,6 +9,7 @@ import CapsuleMachine from "../components/CapsuleMachine";
 import EntryBurst from "../components/EntryBurst";
 import MerchantDrawHeader from "../components/MerchantDrawHeader";
 import MerchantDrawBackground from "../components/MerchantDrawBackground";
+import FlowBottomNavbar from "../components/FlowBottomNavbar";
 import { sourceKey } from "@/locales/config";
 import { useTranslation } from "@/locales/useTranslation";
 import { MONTHLY_DRAW_STATUS, VOUCHER_DRAW_STATUS } from "@/constants/user";
@@ -16,6 +18,10 @@ import { useMerchantDrawInit } from "../useMerchantDrawInit";
 const MerchantDrawFlowPage = ({ token, userId, phone, platform }) => {
     const router = useRouter();
     const { t } = useTranslation();
+    const [activeNav, setActiveNav] = useState("home");
+    const [isTncOpen, setIsTncOpen] = useState(false);
+    const [isFaqOpen, setIsFaqOpen] = useState(false);
+
     const {
         step,
         settings,
@@ -34,11 +40,24 @@ const MerchantDrawFlowPage = ({ token, userId, phone, platform }) => {
     const canOpenMonthlyDraw = hasJoinedMonthlyDraw || Boolean(entryToken);
 
     // Hide the merchant draw wheel when all segments are depleted (stock = 0) and recurring is off.
-    // If settings haven't loaded yet (null), default to showing — no premature hiding.
     const hasPrizesAvailable =
         !settings?.segments ||
         settings.isRecurring === 1 ||
         settings.segments.some((s) => s.itemCount == null || s.itemCount > 0);
+
+    const prizesList = settings?.segments && settings.segments.length > 0
+        ? settings.segments.map((s, idx) => ({
+            name: s.label || s.text || `Prize #${idx + 1}`,
+            type: s.prizeType || "Voucher",
+        }))
+        : [
+            { name: "RM0.05 Universal Cashback Voucher", type: "Cashback" },
+            { name: "RM0.30 Universal Cashback Voucher", type: "Cashback" },
+            { name: "PinDuoDuo RM0.50 Cashback Voucher", type: "Cashback" },
+            { name: "Guardian RM2 off Voucher", type: "Discount" },
+            { name: "Kind Kones 15% Off Promo Code Voucher", type: "Promo Code" },
+            { name: "Lucky Draw Entry to win RM2,888", type: "Lucky Draw Entry" },
+        ];
 
     const handleEnterMerchant = () => {
         const query = {
@@ -161,7 +180,7 @@ const MerchantDrawFlowPage = ({ token, userId, phone, platform }) => {
     }
 
     return (
-        <div className="luckydraw-page-wrapper">
+        <div className="luckydraw-page-wrapper pb-24">
             <EntryBurst />
             <MerchantDrawBackground />
 
@@ -173,167 +192,395 @@ const MerchantDrawFlowPage = ({ token, userId, phone, platform }) => {
                 />
             </div>
 
-            <div style={{ position: "relative", zIndex: 1, maxWidth: 680, margin: "0 auto", padding: "24px 16px 48px" }}>
-                <div style={{ textAlign: "center", padding: "4px 0 28px" }}>
-                    <h1 style={{ fontSize: 30, fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.5px", color: "#111827", margin: "0 0 8px" }}>
-                        {t("welcomeTo", sourceKey.user)}
-                        <span className="luckydraw-fire-gradient">
-                            {settings?.businessName || ""}
-                        </span>
-                    </h1>
-                    <p style={{ fontSize: 13, color: "#9ca3af", fontWeight: 500, margin: 0 }}>
-                        {t("pickAGameAndTryYourLuck", sourceKey.user)}
-                    </p>
-                </div>
+            <div style={{ position: "relative", zIndex: 1, maxWidth: 680, margin: "0 auto", padding: "24px 16px 32px" }}>
+                {activeNav === "home" ? (
+                    <div className="space-y-6 animate-fade-in">
+                        {/* Welcome Header */}
+                        <div style={{ textAlign: "center", padding: "4px 0 12px" }}>
+                            <h1 style={{ fontSize: 28, fontWeight: 900, lineHeight: 1.1, letterSpacing: "-0.5px", color: "#111827", margin: "0 0 6px" }}>
+                                {t("welcomeTo", sourceKey.user)}
+                                <span className="luckydraw-fire-gradient ml-1.5">
+                                    {settings?.businessName || ""}
+                                </span>
+                            </h1>
+                            <p style={{ fontSize: 13, color: "#6b7280", fontWeight: 500, margin: 0 }}>
+                                Complete missions & spin for instant rewards!
+                            </p>
+                        </div>
 
-                <div style={isMobile
-                    ? { display: "flex", flexDirection: "column", gap: 14, marginTop: 20, padding: "0 0" }
-                    : { display: "flex", justifyContent: "center", gap: 16, alignItems: "flex-start", marginTop: 20 }
-                }>
-                    {isMerchantEnabled && hasPrizesAvailable && (
-                        <MerchantDrawWheel
-                            merchantDrawStatus={entryStatus.merchantDrawStatus}
-                            reward={entryStatus.reward}
-                            businessName={settings?.businessName || ""}
-                            onEnter={handleEnterMerchant}
-                            compact={isMobile}
-                        />
-                    )}
-
-                    {isGlobalEnabled && !isMobile && (
-                        <div
-                            style={{ cursor: canOpenMonthlyDraw ? "pointer" : "default", textAlign: "center", width: 200 }}
-                            {...monthlyDrawInteractiveProps}
-                        >
-                            <div style={{ width: 195, height: 195, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "center", paddingBottom: 20 }}>
-                                <GiftIcon
-                                    size={172}
-                                    completed={hasJoinedMonthlyDraw}
-                                />
-                            </div>
-                            <div style={{ marginTop: 20 }}>
-                                <div style={{ fontSize: 17, fontWeight: 800, color: "#1a1a1a" }}>
-                                    {t("monthlyDraw", sourceKey.user)}
+                        {/* SECTION 1: MONTHLY MEGA DRAW (Missions Card Container) */}
+                        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 overflow-hidden relative">
+                            {/* Mission Badge Header */}
+                            <div className="flex items-center justify-between mb-2">
+                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-1.5 rounded-r-full -ml-5 font-black text-sm tracking-wide shadow-sm">
+                                    <Trophy className="w-4 h-4 text-amber-300" />
+                                    <span>1. Monthly Mega Draw</span>
                                 </div>
-                                <div
-                                    style={{
-                                        fontSize: 12,
-                                        marginTop: 3,
-                                        color: hasJoinedMonthlyDraw ? "#16a34a" : "#a08060",
-                                        fontWeight: hasJoinedMonthlyDraw ? 600 : 400,
-                                    }}
+                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200/80 px-2.5 py-1 rounded-full">
+                                    Grand Prize: RM2,888
+                                </span>
+                            </div>
+
+                            {/* Cute Floating Gift Icon Banner */}
+                            <div
+                                onClick={handleMonthlyDrawAction}
+                                className="py-4 px-3 flex flex-col items-center justify-center bg-gradient-to-b from-amber-50/80 via-orange-50/40 to-yellow-50/20 rounded-2xl border border-amber-100 my-3 relative overflow-hidden cursor-pointer hover:border-amber-300 transition-all group shadow-inner"
+                            >
+                                <div className="transform group-hover:scale-105 transition-transform duration-300 py-1">
+                                    <GiftIcon size={128} completed={hasJoinedMonthlyDraw} />
+                                </div>
+                                <div className="text-center mt-1">
+                                    <div className="text-sm font-extrabold text-slate-900 flex items-center justify-center gap-1">
+                                        <span>Monthly Grand Prize Draw</span>
+                                        <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                                    </div>
+                                    <div className="text-[11px] font-semibold text-amber-600 mt-0.5">
+                                        {hasJoinedMonthlyDraw ? "✓ You have successfully joined this month's draw!" : "Tap to complete missions & earn your entry token!"}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <p className="text-xs text-slate-500 font-medium mb-3 mt-2">
+                                1 Mission = 1 Spin per week. Spins refresh every Monday.
+                            </p>
+
+                            {/* Missions List */}
+                            <div className="space-y-2.5">
+                                {/* Mission 1: Upload Purchase Proof / Join Grand Draw */}
+                                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 hover:bg-slate-100/60 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 text-lg shrink-0">
+                                            🧾
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-xs font-bold text-slate-800 truncate">
+                                                Submit spending proof for Grand Draw
+                                            </h4>
+                                            <p className="text-[11px] text-slate-500 truncate">
+                                                {hasJoinedMonthlyDraw ? "You have entered this month's draw" : "Upload receipt to earn entry token"}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleMonthlyDrawAction}
+                                        className={`px-4 py-1.5 rounded-xl font-bold text-xs transition-all shrink-0 ${
+                                            hasJoinedMonthlyDraw
+                                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                                : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
+                                        }`}
+                                    >
+                                        {hasJoinedMonthlyDraw ? "Joined ✓" : "Start"}
+                                    </button>
+                                </div>
+
+                                {/* Mission 2: Play Merchant Lucky Wheel */}
+                                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 hover:bg-slate-100/60 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-xl bg-rose-100 border border-rose-200 flex items-center justify-center text-rose-700 text-lg shrink-0">
+                                            🎡
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-xs font-bold text-slate-800 truncate">
+                                                Spin the Merchant Wheel
+                                            </h4>
+                                            <p className="text-[11px] text-slate-500 truncate">
+                                                Win instant store discounts & free gifts
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleEnterMerchant}
+                                        className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all shrink-0"
+                                    >
+                                        Spin
+                                    </button>
+                                </div>
+
+                                {/* Mission 3: Draw Capsule Voucher */}
+                                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 hover:bg-slate-100/60 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-xl bg-purple-100 border border-purple-200 flex items-center justify-center text-purple-700 text-lg shrink-0">
+                                            🎰
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-xs font-bold text-slate-800 truncate">
+                                                Pull Voucher Capsule Machine
+                                            </h4>
+                                            <p className="text-[11px] text-slate-500 truncate">
+                                                Unlock cashback & rebate vouchers
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleEnterVoucher}
+                                        className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs shadow-sm transition-all shrink-0"
+                                    >
+                                        Draw
+                                    </button>
+                                </div>
+
+                                {/* Mission 4: View My Prizes & Wallet */}
+                                <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100 flex items-center justify-between gap-3 hover:bg-slate-100/60 transition-colors">
+                                    <div className="flex items-center gap-3 min-w-0">
+                                        <div className="w-10 h-10 rounded-xl bg-teal-100 border border-teal-200 flex items-center justify-center text-teal-700 text-lg shrink-0">
+                                            🏆
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-xs font-bold text-slate-800 truncate">
+                                                Check your active Prize Wallet
+                                            </h4>
+                                            <p className="text-[11px] text-slate-500 truncate">
+                                                View & redeem won vouchers at store
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={handleViewDashboard}
+                                        className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs shadow-sm transition-all shrink-0"
+                                    >
+                                        View
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Full Prize List Pill Link */}
+                            <div className="mt-4 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveNav("details")}
+                                    className="w-full py-2.5 px-4 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold text-xs rounded-full border border-blue-200/80 transition-all flex items-center justify-center gap-1.5 group"
                                 >
-                                    {hasJoinedMonthlyDraw
-                                        ? t("joinedDraw", sourceKey.user)
-                                        : t("grandPrizeDraw", sourceKey.user)}
-                                </div>
+                                    <span>Click here to view full Campaign Details & Prize List</span>
+                                    <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                                </button>
                             </div>
-                            <div style={{ marginTop: 16 }}>
-                                {hasJoinedMonthlyDraw ? (
-                                    <div style={{ display: "inline-block", background: "#fff", color: "#6b5740", padding: "12px 28px", borderRadius: 13, fontSize: 14, fontWeight: 700, border: "1.5px solid #e5e0d8", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                                        {t("viewEntries", sourceKey.user)}
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div
-                                            style={{
-                                                display: "inline-block",
-                                                background: "linear-gradient(135deg,#D97706,#B45309)",
-                                                color: "#fff",
-                                                padding: "12px 28px",
-                                                borderRadius: 13,
-                                                fontSize: 14,
-                                                fontWeight: 800,
-                                                boxShadow: canOpenMonthlyDraw ? "0 4px 16px rgba(180,83,9,0.3),0 0 0 3px rgba(180,83,9,0.12)" : "none",
-                                                opacity: canOpenMonthlyDraw ? 1 : 0.55,
-                                                cursor: canOpenMonthlyDraw ? "pointer" : "not-allowed",
-                                            }}
+                        </div>
+
+                        {/* SECTION 2: INSTANT WIN REWARDS (Games & Flash Deals) */}
+                        <div className="bg-white rounded-3xl p-5 shadow-sm border border-slate-100 space-y-4">
+                            {/* Section Badge Header */}
+                            <div className="flex items-center justify-between">
+                                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-1.5 rounded-r-full -ml-5 font-black text-sm tracking-wide shadow-sm">
+                                    <Zap className="w-4 h-4 text-yellow-200 fill-yellow-200" />
+                                    <span>2. Instant Win Rewards</span>
+                                </div>
+                                <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+                                    100% Win Rate
+                                </span>
+                            </div>
+
+                            {/* Interactive Games Cards */}
+                            <div style={isMobile
+                                ? { display: "flex", flexDirection: "column", gap: 14, marginTop: 12 }
+                                : { display: "flex", justifyContent: "center", gap: 16, alignItems: "flex-start", marginTop: 12 }
+                            }>
+                                {isMerchantEnabled && hasPrizesAvailable && (
+                                    <MerchantDrawWheel
+                                        merchantDrawStatus={entryStatus.merchantDrawStatus}
+                                        reward={entryStatus.reward}
+                                        businessName={settings?.businessName || ""}
+                                        onEnter={handleEnterMerchant}
+                                        compact={isMobile}
+                                    />
+                                )}
+
+                                {isVoucherEnabled && (
+                                    <CapsuleMachine
+                                        isCompleted={entryStatus.voucherDrawStatus === VOUCHER_DRAW_STATUS.COMPLETED}
+                                        onEnter={handleEnterVoucher}
+                                        compact={isMobile}
+                                    />
+                                )}
+                            </div>
+
+                            {/* Crazy Flash Deals / Voucher Cards Row */}
+                            <div className="pt-3 border-t border-slate-100">
+                                <h4 className="text-xs font-bold text-slate-800 mb-2.5 flex items-center gap-1.5">
+                                    <span>🏷️ Flash Voucher Highlights</span>
+                                </h4>
+                                <div className="grid grid-cols-2 gap-2.5">
+                                    <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-3 rounded-2xl border border-rose-100 flex flex-col justify-between">
+                                        <div>
+                                            <span className="bg-rose-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                                                Hot Deal
+                                            </span>
+                                            <p className="text-xs font-bold text-slate-900 mt-1.5">
+                                                RM5 Off Rebate Voucher
+                                            </p>
+                                            <p className="text-[10px] text-slate-500 mt-0.5">
+                                                Min spend RM30
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleEnterVoucher}
+                                            className="mt-2.5 w-full py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[11px] transition-colors"
                                         >
-                                            {t("joinDraw", sourceKey.user)} →
-                                        </div>
-                                        {!canOpenMonthlyDraw && (
-                                            <div style={{ fontSize: 11, color: "#9ca3af", fontWeight: 500, marginTop: 8, lineHeight: 1.35 }}>
-                                                {t("joinGlobalLuckyDrawNoToken", sourceKey.user)}
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {isGlobalEnabled && isMobile && (
-                        <div
-                            style={{ display: "flex", alignItems: "center", gap: 16, background: "#fff", border: "1.5px solid rgba(0,0,0,0.06)", borderRadius: 18, padding: 16, boxShadow: "0 2px 10px rgba(0,0,0,0.04)", cursor: canOpenMonthlyDraw ? "pointer" : "default", transition: "transform 0.15s ease-out" }}
-                            {...monthlyDrawInteractiveProps}
-                        >
-                            <div style={{ flexShrink: 0, width: 72, height: 72, borderRadius: 16, background: hasJoinedMonthlyDraw ? "linear-gradient(145deg,#f3f4f6,#e5e7eb)" : "linear-gradient(145deg,#FEF3C7,#FDE68A)", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden", position: "relative", boxShadow: hasJoinedMonthlyDraw ? "none" : "0 4px 14px rgba(217,119,6,0.2)" }}>
-                                <div style={{ filter: hasJoinedMonthlyDraw ? "saturate(0.35)" : "none", opacity: hasJoinedMonthlyDraw ? 0.45 : 1 }}>
-                                    <GiftIcon size={48} completed={hasJoinedMonthlyDraw} />
-                                </div>
-                                {hasJoinedMonthlyDraw && (
-                                    <div style={{ position: "absolute", bottom: -2, right: -2, width: 24, height: 24, borderRadius: "50%", background: "linear-gradient(145deg,#FEF3C7,#FDE68A)", border: "2.5px solid #D97706", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 2px 6px rgba(217,119,6,0.3)", zIndex: 2 }}>
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#92400E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12l5 5L20 7" /></svg>
+                                            Draw Now
+                                        </button>
                                     </div>
-                                )}
-                            </div>
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <div style={{ fontSize: 16, fontWeight: 800, color: "#111827", lineHeight: 1.25 }}>
-                                    {t("monthlyDraw", sourceKey.user)}
-                                </div>
-                                <div style={{ fontSize: 12, color: hasJoinedMonthlyDraw ? "#16a34a" : "#a08060", marginTop: 3, fontWeight: hasJoinedMonthlyDraw ? 600 : 400 }}>
-                                    {hasJoinedMonthlyDraw ? t("joinedDraw", sourceKey.user) : t("grandPrizeDraw", sourceKey.user)}
-                                </div>
-                                <div style={{ marginTop: 10 }}>
-                                    {hasJoinedMonthlyDraw ? (
-                                        <div style={{ display: "inline-block", background: "#fff", color: "#6b5740", padding: "9px 22px", borderRadius: 11, fontSize: 13, fontWeight: 700, border: "1.5px solid #e5e0d8", boxShadow: "0 2px 6px rgba(0,0,0,0.04)" }}>
-                                            {t("viewEntries", sourceKey.user)}
+
+                                    <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-3 rounded-2xl border border-amber-100 flex flex-col justify-between">
+                                        <div>
+                                            <span className="bg-amber-500 text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase">
+                                                Top Prize
+                                            </span>
+                                            <p className="text-xs font-bold text-slate-900 mt-1.5">
+                                                15% Storewide Promo
+                                            </p>
+                                            <p className="text-[10px] text-slate-500 mt-0.5">
+                                                No min spend
+                                            </p>
                                         </div>
-                                    ) : (
-                                        <div style={{
-                                            display: "inline-block",
-                                            background: "linear-gradient(135deg,#D97706,#B45309)",
-                                            color: "#fffbf0",
-                                            padding: "9px 22px",
-                                            borderRadius: 11,
-                                            fontSize: 13,
-                                            fontWeight: 800,
-                                            boxShadow: canOpenMonthlyDraw ? "0 4px 14px rgba(180,83,9,0.25),0 0 0 2px rgba(180,83,9,0.08)" : "none",
-                                            opacity: canOpenMonthlyDraw ? 1 : 0.55,
-                                            cursor: canOpenMonthlyDraw ? "pointer" : "not-allowed",
-                                        }}>
-                                            {t("joinDraw", sourceKey.user)} →
-                                        </div>
-                                    )}
+                                        <button
+                                            type="button"
+                                            onClick={handleEnterMerchant}
+                                            className="mt-2.5 w-full py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-[11px] transition-colors"
+                                        >
+                                            Spin Now
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    )}
-
-                    {isVoucherEnabled && (
-                        <CapsuleMachine
-                            isCompleted={entryStatus.voucherDrawStatus === VOUCHER_DRAW_STATUS.COMPLETED}
-                            onEnter={handleEnterVoucher}
-                            compact={isMobile}
-                        />
-                    )}
-                </div>
-
-                <div style={{ marginTop: 40, textAlign: "center" }}>
-                    <div
-                        onClick={handleViewDashboard}
-                        onKeyDown={handleDashboardKeyDown}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={t("myPrizes", sourceKey.user)}
-                        style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,0.7)", border: "1.5px solid rgba(0,0,0,0.08)", padding: "12px 24px", borderRadius: 14, cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.04)", fontSize: 14, color: "#6b5740", fontWeight: 600 }}
-                    >
-                        🏆 {t("myPrizes", sourceKey.user)}
                     </div>
-                </div>
+                ) : (
+                    /* Details Tab Content (UX based on Reference design) */
+                    <div className="space-y-4 animate-fade-in">
+                        {/* Campaign Hero Banner */}
+                        <div className="rounded-2xl overflow-hidden shadow-sm border border-slate-100 bg-slate-900">
+                            <img
+                                src="/campaign-hero.png"
+                                alt="Campaign Banner"
+                                className="w-full h-48 sm:h-56 object-cover"
+                            />
+                        </div>
+
+                        {/* Title & Description Box */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-3">
+                            <h2 className="text-xl font-black text-slate-900 leading-snug">
+                                {settings?.businessName || "Turbo Mission Hunt"} Campaign Prize List
+                            </h2>
+                            
+                            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                                <Calendar className="w-4 h-4 text-blue-600" />
+                                <span>30 Jun 2026 – 31 Jul 2026</span>
+                            </div>
+
+                            <p className="text-xs text-slate-600 leading-relaxed pt-1">
+                                Hey TNG eWallet users, don't miss out on this mid-year upsized special! Unlock more rewards, complete missions, earn spins, and stand a chance to win exciting prizes up to RM2,888!
+                            </p>
+
+                            <div className="text-xs font-bold text-slate-900 pt-1">
+                                Duration: <span className="font-semibold text-slate-700">1–31 July 2026</span>
+                            </div>
+                        </div>
+
+                        {/* Prize List Table */}
+                        <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+                            <h3 className="text-base font-bold text-slate-900 mb-3">
+                                Prize List
+                            </h3>
+                            <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                                <table className="w-full text-left text-xs">
+                                    <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-bold">
+                                        <tr>
+                                            <th className="py-2.5 px-3 border-r border-slate-200 w-12 text-center">No.</th>
+                                            <th className="py-2.5 px-3 border-r border-slate-200">Prize</th>
+                                            <th className="py-2.5 px-3">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100 text-slate-700">
+                                        {prizesList.map((item, index) => (
+                                            <tr key={index} className="hover:bg-slate-50/80 transition-colors">
+                                                <td className="py-2.5 px-3 border-r border-slate-100 text-center font-medium text-slate-500">
+                                                    {index + 1}
+                                                </td>
+                                                <td className="py-2.5 px-3 border-r border-slate-100 font-semibold text-slate-800">
+                                                    {item.name}
+                                                </td>
+                                                <td className="py-2.5 px-3 text-slate-600 font-medium whitespace-nowrap">
+                                                    {item.type}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {/* Terms & Conditions Accordion */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <button
+                                type="button"
+                                onClick={() => setIsTncOpen(!isTncOpen)}
+                                className="w-full flex items-center justify-between p-4 text-left font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors"
+                            >
+                                <span>Terms & Conditions</span>
+                                <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isTncOpen ? "rotate-90" : ""}`} />
+                            </button>
+                            {isTncOpen && (
+                                <div className="px-4 pb-4 pt-1 text-xs text-slate-600 border-t border-slate-100 leading-relaxed space-y-2 bg-slate-50/50">
+                                    <p>1. Campaign runs from 1 July 2026 until 31 July 2026, inclusive of both dates.</p>
+                                    <p>2. Universal Cashback Vouchers & Discount Vouchers will be automatically credited to eligible wallets upon successful spin.</p>
+                                    <p>3. Each registered user is entitled to a maximum of 3 spin opportunities per campaign cycle.</p>
+                                    <p>4. Organizers reserve the right to modify or terminate the campaign without prior notice.</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* FAQ Accordion */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <button
+                                type="button"
+                                onClick={() => setIsFaqOpen(!isFaqOpen)}
+                                className="w-full flex items-center justify-between p-4 text-left font-bold text-sm text-slate-900 hover:bg-slate-50 transition-colors"
+                            >
+                                <span>FAQ</span>
+                                <ChevronRight className={`w-5 h-5 text-slate-400 transition-transform duration-200 ${isFaqOpen ? "rotate-90" : ""}`} />
+                            </button>
+                            {isFaqOpen && (
+                                <div className="px-4 pb-4 pt-1 text-xs text-slate-600 border-t border-slate-100 leading-relaxed space-y-3 bg-slate-50/50">
+                                    <div>
+                                        <p className="font-bold text-slate-800">Q: How do I claim my prize?</p>
+                                        <p className="text-slate-500 mt-0.5">A: Prizes are credited instantly to your eWallet or stored in your Voucher Wallet for outlet redemption.</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-slate-800">Q: Can I transfer my vouchers to another account?</p>
+                                        <p className="text-slate-500 mt-0.5">A: Vouchers are tied directly to your verified phone number and account and cannot be transferred.</p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Join Now Primary Action Button */}
+                        <div className="pt-2 pb-4">
+                            <button
+                                type="button"
+                                onClick={() => setActiveNav("home")}
+                                className="w-full py-3.5 px-6 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white font-bold text-base rounded-2xl shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>Join Now</span>
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {/* Bottom Navbar Component */}
+            <FlowBottomNavbar activeNav={activeNav} onChangeNav={setActiveNav} />
         </div>
     );
 };
 
 export default MerchantDrawFlowPage;
+
+
